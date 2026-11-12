@@ -3,6 +3,7 @@ import { Minus, Plus, ShoppingBag } from 'lucide-react';
 import { money } from '../lib/format';
 import type { Product } from '../lib/types';
 import { useCart } from '../store/cart';
+import { usePrefs } from '../store/prefs';
 import { useToast } from '../store/toast';
 import { Modal } from './Modal';
 import { Stars } from './Stars';
@@ -15,6 +16,7 @@ type Props = {
 export function QuickView({ product, onClose }: Props) {
   const { addItem, openCart } = useCart();
   const { push } = useToast();
+  const { t } = usePrefs();
   const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
@@ -24,7 +26,7 @@ export function QuickView({ product, onClose }: Props) {
   if (!product) return null;
 
   return (
-    <Modal open={Boolean(product)} onClose={onClose} size="lg" title="Product details">
+    <Modal open={Boolean(product)} onClose={onClose} size="lg" title={t('Product details')}>
       <div className="grid gap-6 sm:grid-cols-2">
         <div className="overflow-hidden rounded-3xl bg-cream">
           <img
@@ -46,12 +48,12 @@ export function QuickView({ product, onClose }: Props) {
 
           <dl className="mt-5 grid grid-cols-2 gap-3 text-sm">
             <div className="rounded-2xl bg-mist px-4 py-3">
-              <dt className="text-[11px] uppercase tracking-wide text-muted">Category</dt>
-              <dd className="font-semibold">{product.categoryName || 'Burgers'}</dd>
+              <dt className="text-[11px] uppercase tracking-wide text-muted">{t('Category')}</dt>
+              <dd className="font-semibold">{product.categoryName || t('Burgers')}</dd>
             </div>
             <div className="rounded-2xl bg-mist px-4 py-3">
-              <dt className="text-[11px] uppercase tracking-wide text-muted">Ready in</dt>
-              <dd className="font-semibold">15–20 min</dd>
+              <dt className="text-[11px] uppercase tracking-wide text-muted">{t('Ready in')}</dt>
+              <dd className="font-semibold">{t('15–20 min')}</dd>
             </div>
           </dl>
 
@@ -88,12 +90,12 @@ export function QuickView({ product, onClose }: Props) {
               className="btn-primary flex-1"
               onClick={() => {
                 addItem(product, quantity);
-                push(`${quantity} × ${product.name} added to your bag`);
+                push(t('{count} × {name} added to your bag', { count: quantity, name: product.name }));
                 onClose();
                 openCart();
               }}
             >
-              <ShoppingBag className="size-4" /> Add to bag · {money(product.finalPrice * quantity)}
+              <ShoppingBag className="size-4" /> {t('Add to bag')} · {money(product.finalPrice * quantity)}
             </button>
           </div>
         </div>

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Award, ChefHat, Leaf, Truck } from 'lucide-react';
+import { usePrefs } from '../store/prefs';
 import { Reveal } from './Reveal';
 
 const features = [
@@ -69,6 +70,8 @@ function Counter({ target, suffix, decimals }: { target: number; suffix: string;
 }
 
 export function AboutSection() {
+  const { t } = usePrefs();
+
   return (
     <section id="about" className="section-pad scroll-mt-24">
       <div className="container-page">
@@ -94,23 +97,26 @@ export function AboutSection() {
 
             <div className="absolute -left-2 -top-5 rounded-2xl bg-brand px-5 py-4 text-white shadow-soft sm:-left-5">
               <p className="text-3xl font-extrabold leading-none">5+</p>
-              <p className="mt-1 text-[11px] font-medium uppercase tracking-wide">Years grilling</p>
+              <p className="mt-1 text-[11px] font-medium uppercase tracking-wide">{t('Years grilling')}</p>
             </div>
           </Reveal>
 
           <Reveal delay={80}>
-            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">Our story</span>
+            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">
+              {t('Our story')}
+            </span>
             <h2 className="mt-3 text-[clamp(2rem,4vw,2.9rem)] font-extrabold leading-tight">
-              About Burger House
+              {t('About Burger House')}
             </h2>
             <p className="mt-4 text-sm leading-relaxed text-muted sm:text-base">
-              At Burger House, we believe every great burger starts with fresh ingredients, quality meat,
-              delicious flavors, and a passion for food.
+              {t(
+                'At Burger House, we believe every great burger starts with fresh ingredients, quality meat, delicious flavors, and a passion for food.'
+              )}
             </p>
             <p className="mt-3 text-sm leading-relaxed text-muted">
-              What began as a two-table corner grill in 2019 is now the neighbourhood favourite for
-              flame-grilled burgers. Every patty is pressed by hand, every bun is baked the same morning,
-              and every sauce is made in house — no shortcuts, no compromise.
+              {t(
+                'What began as a two-table corner grill in 2019 is now the neighbourhood favourite for flame-grilled burgers. Every patty is pressed by hand, every bun is baked the same morning, and every sauce is made in house — no shortcuts, no compromise.'
+              )}
             </p>
 
             <ul className="mt-7 grid gap-3 sm:grid-cols-2">
@@ -120,8 +126,8 @@ export function AboutSection() {
                     <feature.icon className="size-5" strokeWidth={1.8} />
                   </span>
                   <div>
-                    <p className="text-sm font-semibold leading-tight">{feature.title}</p>
-                    <p className="mt-1 text-xs leading-relaxed text-muted">{feature.copy}</p>
+                    <p className="text-sm font-semibold leading-tight">{t(feature.title)}</p>
+                    <p className="mt-1 text-xs leading-relaxed text-muted">{t(feature.copy)}</p>
                   </div>
                 </li>
               ))}
@@ -136,7 +142,7 @@ export function AboutSection() {
                 <dd className="text-[clamp(1.75rem,3.4vw,2.5rem)] font-extrabold leading-none text-brand">
                   <Counter target={stat.target} suffix={stat.suffix} decimals={stat.decimals} />
                 </dd>
-                <dt className="mt-2 text-xs font-medium uppercase tracking-wide text-ink-soft">{stat.label}</dt>
+                <dt className="mt-2 text-xs font-medium uppercase tracking-wide text-ink-soft">{t(stat.label)}</dt>
               </div>
             ))}
           </dl>

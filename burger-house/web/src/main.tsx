@@ -5,6 +5,7 @@ import App from './App';
 import './index.css';
 import { AuthProvider } from './store/auth';
 import { CartProvider } from './store/cart';
+import { PrefsProvider } from './store/prefs';
 import { SettingsProvider } from './store/settings';
 import { ToastProvider } from './store/toast';
 
@@ -12,13 +13,15 @@ createRoot(document.getElementById('root') as HTMLElement).render(
   <StrictMode>
     <BrowserRouter>
       <ToastProvider>
-        <SettingsProvider>
-          <AuthProvider>
-            <CartProvider>
-              <App />
-            </CartProvider>
-          </AuthProvider>
-        </SettingsProvider>
+        <PrefsProvider>
+          <SettingsProvider>
+            <AuthProvider>
+              <CartProvider>
+                <App />
+              </CartProvider>
+            </AuthProvider>
+          </SettingsProvider>
+        </PrefsProvider>
       </ToastProvider>
     </BrowserRouter>
   </StrictMode>

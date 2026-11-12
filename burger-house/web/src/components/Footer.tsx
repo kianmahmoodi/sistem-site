@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Clock3, Facebook, Instagram, Mail, MapPin, Music2, Phone, Sandwich, Twitter } from 'lucide-react';
 import { api, ApiError } from '../lib/api';
+import { usePrefs } from '../store/prefs';
 import { useSettings } from '../store/settings';
 import { useToast } from '../store/toast';
 
@@ -14,6 +15,7 @@ const quickLinks = [
 
 export function Footer() {
   const settings = useSettings();
+  const { t } = usePrefs();
   const { push } = useToast();
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'sending' | 'done'>('idle');
@@ -23,7 +25,7 @@ export function Footer() {
     setError('');
     const value = email.trim();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(value)) {
-      setError('Please enter a valid email address.');
+      setError(t('Please enter a valid email address.'));
       return;
     }
     setStatus('sending');
@@ -37,7 +39,7 @@ export function Footer() {
       push(result.message);
     } catch (err) {
       setStatus('idle');
-      setError(err instanceof ApiError ? err.message : 'Could not subscribe. Please try again.');
+      setError(err instanceof ApiError ? err.message : t('Could not subscribe. Please try again.'));
     }
   };
 
@@ -61,8 +63,9 @@ export function Footer() {
               <span className="text-lg font-bold">{settings.name}</span>
             </div>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-ink-soft">
-              Flame-grilled burgers made with fresh ingredients and a lot of love. Dine in, take away or
-              have it delivered to your door.
+              {t(
+                'Flame-grilled burgers made with fresh ingredients and a lot of love. Dine in, take away or have it delivered to your door.'
+              )}
             </p>
             <div className="mt-5 flex items-center gap-2.5">
               {[
@@ -86,30 +89,30 @@ export function Footer() {
           </div>
 
           <nav aria-label="Footer">
-            <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-ink">Explore</h3>
+            <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-ink">{t('Explore')}</h3>
             <ul className="mt-4 space-y-2.5 text-sm text-ink-soft">
               {quickLinks.map((link) => (
                 <li key={link.label}>
                   <button type="button" onClick={() => scrollTo(link.hash)} className="transition hover:text-brand">
-                    {link.label}
+                    {t(link.label)}
                   </button>
                 </li>
               ))}
               <li>
                 <Link to="/account" className="transition hover:text-brand">
-                  My Orders
+                  {t('My Orders')}
                 </Link>
               </li>
               <li>
                 <Link to="/checkout" className="transition hover:text-brand">
-                  Checkout
+                  {t('Checkout')}
                 </Link>
               </li>
             </ul>
           </nav>
 
           <div>
-            <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-ink">Contact</h3>
+            <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-ink">{t('Contact')}</h3>
             <ul className="mt-4 space-y-3 text-sm text-ink-soft">
               <li className="flex items-start gap-2.5">
                 <Phone className="mt-0.5 size-4 shrink-0 text-brand" />
@@ -135,9 +138,9 @@ export function Footer() {
           </div>
 
           <div>
-            <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-ink">Newsletter</h3>
+            <h3 className="text-sm font-bold uppercase tracking-[0.12em] text-ink">{t('Newsletter')}</h3>
             <p className="mt-4 text-sm text-ink-soft">
-              Fresh drops, secret menu items and member-only deals — once a week.
+              {t('Fresh drops, secret menu items and member-only deals — once a week.')}
             </p>
             <form
               className="mt-4"
@@ -147,7 +150,7 @@ export function Footer() {
               }}
             >
               <label className="relative block">
-                <span className="sr-only">Your email</span>
+                <span className="sr-only">{t('Your email')}</span>
                 <input
                   value={email}
                   onChange={(event) => {
@@ -156,39 +159,46 @@ export function Footer() {
                     setError('');
                   }}
                   type="email"
-                  placeholder="Your email"
-                  className="field bg-white pr-14"
+                  placeholder={t('Your email')}
+                  className="field bg-white pe-14"
                   aria-invalid={Boolean(error)}
                 />
                 <button
                   type="submit"
                   disabled={status === 'sending'}
                   aria-label="Subscribe to the newsletter"
-                  className="absolute right-1.5 top-1/2 grid size-9 -translate-y-1/2 place-items-center rounded-full bg-brand text-white transition hover:bg-brand-deep disabled:opacity-60"
+                  className="absolute end-1.5 top-1/2 grid size-9 -translate-y-1/2 place-items-center rounded-full bg-brand text-white transition hover:bg-brand-deep disabled:opacity-60"
                 >
                   <ArrowRight className="size-4" />
                 </button>
               </label>
               {error && <p className="mt-2 text-xs font-medium text-rose-600">{error}</p>}
               {status === 'done' && (
-                <p className="mt-2 text-xs font-medium text-emerald-600">You are subscribed. Welcome aboard!</p>
+                <p className="mt-2 text-xs font-medium text-emerald-600">
+                  {t('You are subscribed. Welcome aboard!')}
+                </p>
               )}
-              {status === 'sending' && <p className="mt-2 text-xs text-muted">Subscribing…</p>}
+              {status === 'sending' && <p className="mt-2 text-xs text-muted">{t('Subscribing…')}</p>}
             </form>
           </div>
         </div>
 
         <div className="mt-12 flex flex-col gap-4 border-t border-brand/15 pt-6 text-xs text-ink-soft sm:flex-row sm:items-center sm:justify-between">
-          <p>© {new Date().getFullYear()} {settings.name}. All rights reserved.</p>
+          <p>
+            {t('© {year} {name}. All rights reserved.', {
+              year: new Date().getFullYear(),
+              name: settings.name,
+            })}
+          </p>
           <div className="flex items-center gap-5">
             <Link to="/privacy" className="transition hover:text-brand">
-              Privacy Policy
+              {t('Privacy Policy')}
             </Link>
             <Link to="/terms" className="transition hover:text-brand">
-              Terms and Conditions
+              {t('Terms and Conditions')}
             </Link>
             <Link to="/admin" className="transition hover:text-brand">
-              Staff login
+              {t('Staff login')}
             </Link>
           </div>
         </div>

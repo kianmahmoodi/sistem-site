@@ -3,7 +3,9 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, Sandwich, ShoppingBag, UserRound, X } from 'lucide-react';
 import { useAuth } from '../store/auth';
 import { useCart } from '../store/cart';
+import { usePrefs } from '../store/prefs';
 import { useSettings } from '../store/settings';
+import { SiteSettingsMenu } from './SiteSettingsMenu';
 
 const links = [
   { label: 'Home', hash: 'top' },
@@ -15,6 +17,7 @@ const links = [
 
 export function Header() {
   const settings = useSettings();
+  const { t } = usePrefs();
   const { itemCount, openCart } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -106,16 +109,18 @@ export function Header() {
                       : 'text-ink-soft hover:bg-cream/70 hover:text-brand'
                   }`}
                 >
-                  {link.label}
+                  {t(link.label)}
                 </button>
               </li>
             ))}
           </ul>
 
           <div className="flex items-center gap-2">
+            <SiteSettingsMenu />
+
             <Link
               to={user ? (user.role === 'admin' ? '/admin' : '/account') : '/login'}
-              aria-label={user ? 'Your account' : 'Sign in'}
+              aria-label={user ? t('Your account') : t('Sign in')}
               className="grid size-10 place-items-center rounded-full border border-line text-ink-soft transition duration-300 hover:border-brand/40 hover:text-brand"
             >
               <UserRound className="size-[18px]" />
@@ -138,7 +143,7 @@ export function Header() {
               onClick={() => setMobileOpen((value) => !value)}
               aria-expanded={mobileOpen}
               aria-controls="mobile-nav"
-              aria-label={mobileOpen ? 'Close menu' : 'Open menu'}
+              aria-label={mobileOpen ? t('Close menu') : t('Open menu')}
               className="grid size-10 place-items-center rounded-full border border-line text-ink transition hover:border-brand/40 hover:text-brand lg:hidden"
             >
               {mobileOpen ? <X className="size-5" /> : <Menu className="size-5" />}
@@ -158,11 +163,11 @@ export function Header() {
                 <button
                   type="button"
                   onClick={() => (link.route ? (setMobileOpen(false), navigate(link.route)) : go(link.hash))}
-                  className={`w-full rounded-2xl px-4 py-3 text-left text-sm font-medium transition ${
+                  className={`w-full rounded-2xl px-4 py-3 text-start text-sm font-medium transition ${
                     isActive(link) ? 'bg-cream text-brand' : 'text-ink-soft hover:bg-mist'
                   }`}
                 >
-                  {link.label}
+                  {t(link.label)}
                 </button>
               </li>
             ))}
@@ -171,7 +176,7 @@ export function Header() {
                 to={user ? (user.role === 'admin' ? '/admin' : '/account') : '/login'}
                 className="block rounded-2xl bg-mist px-4 py-3 text-sm font-semibold text-ink"
               >
-                {user ? `${user.name.split(' ')[0]}'s account` : 'Sign in / Register'}
+                {user ? user.name.split(' ')[0] : t('Sign in / Register')}
               </Link>
             </li>
           </ul>

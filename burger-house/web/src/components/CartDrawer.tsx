@@ -4,6 +4,7 @@ import { Minus, Plus, ShoppingBag, Tag, Trash2, X } from 'lucide-react';
 import { api, ApiError } from '../lib/api';
 import { money } from '../lib/format';
 import { useCart } from '../store/cart';
+import { usePrefs } from '../store/prefs';
 import { useSettings } from '../store/settings';
 import { useToast } from '../store/toast';
 
@@ -12,6 +13,7 @@ export function CartDrawer() {
     useCart();
   const settings = useSettings();
   const { push } = useToast();
+  const { t } = usePrefs();
   const navigate = useNavigate();
   const [code, setCode] = useState('');
   const [applying, setApplying] = useState(false);
@@ -38,9 +40,9 @@ export function CartDrawer() {
       );
       applyCoupon({ code: result.code, kind: result.kind, value: result.value });
       setCode('');
-      push(`Discount code ${result.code} applied`);
+      push(t('Discount code {code} applied', { code: result.code }));
     } catch (error) {
-      push(error instanceof ApiError ? error.message : 'Could not apply that code', 'error');
+      push(error instanceof ApiError ? error.message : t('Could not apply that code'), 'error');
     } finally {
       setApplying(false);
     }
@@ -54,7 +56,7 @@ export function CartDrawer() {
         type="button"
         aria-label="Close cart"
         onClick={closeCart}
-        className="absolute inset-0 cursor-default bg-ink/45 backdrop-blur-[2px]"
+        className="absolute inset-0 cursor-default bg-black/55 backdrop-blur-[2px]"
         style={{ animation: 'fade-in 0.2s ease-out' }}
       />
 
@@ -71,9 +73,9 @@ export function CartDrawer() {
               <ShoppingBag className="size-[18px]" />
             </span>
             <div>
-              <h2 className="text-base font-bold leading-tight">Your Bag</h2>
+              <h2 className="text-base font-bold leading-tight">{t('Your Bag')}</h2>
               <p className="text-xs text-muted">
-                {totals.itemCount} item{totals.itemCount === 1 ? '' : 's'}
+                {t('{count} items', { count: totals.itemCount })}
               </p>
             </div>
           </div>
@@ -93,8 +95,8 @@ export function CartDrawer() {
               <ShoppingBag className="size-9" strokeWidth={1.6} />
             </span>
             <div>
-              <p className="text-lg font-semibold">Your bag is empty</p>
-              <p className="mt-1 text-sm text-muted">Add a burger and we will get grilling.</p>
+              <p className="text-lg font-semibold">{t('Your bag is empty')}</p>
+              <p className="mt-1 text-sm text-muted">{t('Add a burger and we will get grilling.')}</p>
             </div>
             <button
               type="button"
@@ -104,7 +106,7 @@ export function CartDrawer() {
                 document.getElementById('menu')?.scrollIntoView({ behavior: 'smooth' });
               }}
             >
-              Browse the menu
+              {t('Browse the menu')}
             </button>
           </div>
         ) : (
@@ -112,10 +114,10 @@ export function CartDrawer() {
             <div className="border-b border-line bg-cream/60 px-5 py-3">
               {remaining > 0 ? (
                 <p className="text-xs font-medium text-ink-soft">
-                  Add <span className="font-bold text-brand">{money(remaining)}</span> more for free delivery
+                  {t('Add {amount} more for free delivery', { amount: money(remaining) })}
                 </p>
               ) : (
-                <p className="text-xs font-semibold text-success">You unlocked free delivery 🎉</p>
+                <p className="text-xs font-semibold text-success">{t('You unlocked free delivery 🎉')}</p>
               )}
               <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-white">
                 <div
@@ -148,7 +150,9 @@ export function CartDrawer() {
                         <Trash2 className="size-4" />
                       </button>
                     </div>
-                    <p className="text-xs text-muted">{money(line.price)} each</p>
+                    <p className="text-xs text-muted">
+                      {money(line.price)} {t('each')}
+                    </p>
                     <div className="mt-auto flex items-center justify-between pt-2">
                       <div className="flex items-center gap-1 rounded-full border border-line">
                         <button
@@ -180,10 +184,10 @@ export function CartDrawer() {
               {coupon ? (
                 <div className="flex items-center justify-between rounded-2xl bg-emerald-50 px-3 py-2 text-xs font-semibold text-emerald-700">
                   <span className="flex items-center gap-2">
-                    <Tag className="size-3.5" /> {coupon.code} applied
+                    <Tag className="size-3.5" /> {t('{code} applied', { code: coupon.code })}
                   </span>
                   <button type="button" onClick={removeCoupon} className="underline">
-                    remove
+                    {t('remove')}
                   </button>
                 </div>
               ) : (
@@ -194,8 +198,8 @@ export function CartDrawer() {
                     onKeyDown={(event) => {
                       if (event.key === 'Enter') void applyCode();
                     }}
-                    placeholder="Discount code"
-                    aria-label="Discount code"
+                    placeholder={t('Discount code')}
+                    aria-label={t('Discount code')}
                     className="field py-2.5 text-xs"
                   />
                   <button
@@ -204,32 +208,32 @@ export function CartDrawer() {
                     disabled={applying || !code.trim()}
                     className="btn-soft shrink-0 px-4 py-2.5 text-xs"
                   >
-                    {applying ? 'Checking…' : 'Apply'}
+                    {applying ? t('Checking…') : t('Apply')}
                   </button>
                 </div>
               )}
 
               <dl className="space-y-1.5 text-sm">
                 <div className="flex justify-between text-ink-soft">
-                  <dt>Subtotal</dt>
+                  <dt>{t('Subtotal')}</dt>
                   <dd>{money(totals.subtotal)}</dd>
                 </div>
                 {totals.discount > 0 && (
                   <div className="flex justify-between text-emerald-600">
-                    <dt>Discount</dt>
+                    <dt>{t('Discount')}</dt>
                     <dd>-{money(totals.discount)}</dd>
                   </div>
                 )}
                 <div className="flex justify-between text-ink-soft">
-                  <dt>Delivery fee</dt>
-                  <dd>{totals.deliveryFee === 0 ? 'Free' : money(totals.deliveryFee)}</dd>
+                  <dt>{t('Delivery fee')}</dt>
+                  <dd>{totals.deliveryFee === 0 ? t('Free') : money(totals.deliveryFee)}</dd>
                 </div>
                 <div className="flex justify-between text-ink-soft">
-                  <dt>Tax ({(settings.taxRate * 100).toFixed(0)}%)</dt>
+                  <dt>{t('Tax ({rate}%)', { rate: (settings.taxRate * 100).toFixed(0) })}</dt>
                   <dd>{money(totals.tax)}</dd>
                 </div>
                 <div className="flex justify-between border-t border-dashed border-line pt-2 text-base font-bold">
-                  <dt>Total</dt>
+                  <dt>{t('Total')}</dt>
                   <dd className="text-brand">{money(totals.total)}</dd>
                 </div>
               </dl>
@@ -242,10 +246,10 @@ export function CartDrawer() {
                   navigate('/checkout');
                 }}
               >
-                Checkout
+                {t('Checkout')}
               </button>
               <button type="button" onClick={closeCart} className="w-full text-center text-xs font-semibold text-muted hover:text-brand">
-                Continue shopping
+                {t('Continue shopping')}
               </button>
             </div>
           </>

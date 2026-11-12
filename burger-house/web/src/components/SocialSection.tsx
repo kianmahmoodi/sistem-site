@@ -43,7 +43,7 @@ export function SocialSection() {
                   loading="lazy"
                   className="aspect-square w-full object-cover transition duration-700 group-hover:scale-110"
                 />
-                <span className="absolute inset-0 grid place-items-center bg-ink/45 opacity-0 backdrop-blur-[1px] transition duration-300 group-hover:opacity-100">
+                <span className="absolute inset-0 grid place-items-center bg-black/45 opacity-0 backdrop-blur-[1px] transition duration-300 group-hover:opacity-100">
                   <Instagram className="size-7 text-white" />
                 </span>
               </a>

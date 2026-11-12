@@ -4,6 +4,7 @@ import { api } from '../lib/api';
 import { money } from '../lib/format';
 import type { Product } from '../lib/types';
 import { useCart } from '../store/cart';
+import { usePrefs } from '../store/prefs';
 import { useSettings } from '../store/settings';
 import type { Settings } from '../lib/types';
 import { Reveal } from './Reveal';
@@ -40,6 +41,7 @@ export function HotDeals() {
   const settings = useSettings();
   const { deal } = settings;
   const { addItem, openCart } = useCart();
+  const { t } = usePrefs();
   const [product, setProduct] = useState<Product | null>(null);
   const countdown = useCountdown(deal.endsAt);
   const saving = Math.max(0, deal.originalPrice - deal.comboPrice);
@@ -83,7 +85,7 @@ export function HotDeals() {
             <div className="grid items-center gap-10 lg:grid-cols-2">
               <div>
                 <span className="inline-flex items-center gap-2 rounded-full bg-white px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-brand shadow-sm">
-                  <Zap className="size-3.5" /> Limited time
+                  <Zap className="size-3.5" /> {t('Limited time')}
                 </span>
                 <h2 className="mt-4 text-[clamp(2rem,4vw,3rem)] font-extrabold leading-tight">
                   {deal.title}
@@ -99,7 +101,7 @@ export function HotDeals() {
                     {money(deal.originalPrice)}
                   </span>
                   {percent > 0 && (
-                    <span className="badge mb-1 bg-danger text-white">Save {percent}%</span>
+                    <span className="badge mb-1 bg-danger text-white">{t('Save {percent}%', { percent })}</span>
                   )}
                 </div>
 
@@ -114,31 +116,33 @@ export function HotDeals() {
                           {String(unit.value).padStart(2, '0')}
                         </p>
                         <p className="mt-1 text-[10px] font-medium uppercase tracking-wide text-muted">
-                          {unit.label}
+                          {t(unit.label)}
                         </p>
                       </div>
                     ))}
                   </div>
                 ) : (
                   <p className="mt-6 flex items-center gap-2 text-sm font-semibold text-ink-soft">
-                    <Clock3 className="size-4 text-brand" /> New deal drops every week — order while it lasts.
+                    <Clock3 className="size-4 text-brand" />{' '}
+                    {t('New deal drops every week — order while it lasts.')}
                   </p>
                 )}
 
                 <div className="mt-6 flex flex-wrap items-center gap-5 text-xs font-semibold text-ink-soft">
                   {deal.freeDelivery && (
                     <span className="inline-flex items-center gap-1.5">
-                      <Truck className="size-4 text-success" /> Free delivery included
+                      <Truck className="size-4 text-success" /> {t('Free delivery included')}
                     </span>
                   )}
                   <span className="inline-flex items-center gap-1.5">
-                    <Star className="size-4 text-brand" fill="currentColor" /> 5.0 rated by 620 guests
+                    <Star className="size-4 text-brand" fill="currentColor" />{' '}
+                    {t('5.0 rated by 620 guests')}
                   </span>
                 </div>
 
                 <button type="button" onClick={orderCombo} className="btn-primary group mt-7">
-                  Order This Combo
-                  <ArrowRight className="size-4 transition group-hover:translate-x-0.5" />
+                  {t('Order This Combo')}
+                  <ArrowRight className="size-4 transition group-hover:translate-x-0.5 rtl:rotate-180" />
                 </button>
               </div>
 
@@ -151,17 +155,17 @@ export function HotDeals() {
                     className="aspect-[4/3.4] w-full object-cover transition duration-700 hover:scale-105"
                   />
                   <span className="absolute left-4 top-4 rounded-full bg-white px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.1em] text-ink shadow-sm">
-                    {deal.freeDelivery ? 'Free delivery' : 'Chef’s pick'}
+                    {deal.freeDelivery ? t('Free delivery') : t('Chef’s pick')}
                   </span>
                   <span className="absolute right-4 top-4 rounded-full bg-danger px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.1em] text-white shadow-sm">
-                    Combo Pack
+                    {t('Combo Pack')}
                   </span>
                 </div>
 
                 <div className="absolute -bottom-5 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full bg-white px-5 py-3 shadow-soft">
                   <Star className="size-4 text-brand" fill="currentColor" />
                   <span className="text-sm font-bold">5.0</span>
-                  <span className="text-xs text-muted">· 620 reviews</span>
+                  <span className="text-xs text-muted">· {t('620 reviews')}</span>
                 </div>
               </div>
             </div>

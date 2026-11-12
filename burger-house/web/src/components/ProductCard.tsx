@@ -3,6 +3,7 @@ import { money } from '../lib/format';
 import type { Product } from '../lib/types';
 import { useCart } from '../store/cart';
 import { useFavorites } from '../store/favorites';
+import { usePrefs } from '../store/prefs';
 import { useToast } from '../store/toast';
 import { Stars } from './Stars';
 
@@ -21,12 +22,13 @@ type Props = {
 export function ProductCard({ product, onQuickView }: Props) {
   const { addItem } = useCart();
   const { push } = useToast();
+  const { t } = usePrefs();
   const { isFavorite, toggle } = useFavorites();
   const favorite = isFavorite(product.id);
 
   const add = () => {
     addItem(product);
-    push(`${product.name} added to your bag`);
+    push(t('{name} added to your bag', { name: product.name }));
   };
 
   return (
@@ -56,9 +58,14 @@ export function ProductCard({ product, onQuickView }: Props) {
           type="button"
           onClick={() => {
             toggle(product.id);
-            push(favorite ? `${product.name} removed from favourites` : `${product.name} saved to favourites`, 'info');
+            push(
+              favorite
+                ? t('{name} removed from favourites', { name: product.name })
+                : t('{name} saved to favourites', { name: product.name }),
+              'info'
+            );
           }}
-          aria-label={favorite ? `Remove ${product.name} from favourites` : `Save ${product.name} to favourites`}
+          aria-label={favorite ? 'Remove from favourites' : 'Save to favourites'}
           aria-pressed={favorite}
           className={`absolute right-3 top-3 grid size-9 place-items-center rounded-full bg-white/95 shadow-sm backdrop-blur transition duration-300 hover:scale-105 ${
             favorite ? 'text-danger' : 'text-ink-soft hover:text-brand'
@@ -72,7 +79,7 @@ export function ProductCard({ product, onQuickView }: Props) {
           onClick={() => onQuickView(product)}
           className="absolute inset-x-3 bottom-3 flex translate-y-3 items-center justify-center gap-2 rounded-full bg-white/95 py-2.5 text-xs font-semibold text-ink opacity-0 shadow-sm backdrop-blur transition duration-300 group-hover:translate-y-0 group-hover:opacity-100 focus-visible:translate-y-0 focus-visible:opacity-100"
         >
-          <Eye className="size-4" /> Quick View
+          <Eye className="size-4" /> {t('Quick View')}
         </button>
       </div>
 
@@ -80,7 +87,7 @@ export function ProductCard({ product, onQuickView }: Props) {
         <div className="flex items-center justify-between">
           <Stars rating={product.rating} showValue />
           <span className="text-[11px] font-medium uppercase tracking-wide text-muted">
-            {product.categoryName || 'Burgers'}
+            {product.categoryName || t('Burgers')}
           </span>
         </div>
 

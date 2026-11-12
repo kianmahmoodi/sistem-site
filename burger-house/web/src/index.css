@@ -124,6 +124,7 @@
   html {
     scroll-behavior: smooth;
     -webkit-text-size-adjust: 100%;
+    font-size: calc(16px * var(--text-scale, 1));
   }
 
   body {
@@ -252,4 +253,126 @@
     opacity: 1;
     transform: none;
   }
+}
+
+/* ============================================================
+   Display preferences (text size, text colour tone, day/night)
+   Applied through data attributes on <html> by PrefsProvider.
+   ============================================================ */
+
+:root {
+  --text-scale: 1;
+  --glass-sheen: rgba(255, 255, 255, 0.72);
+  --glass-edge: rgba(255, 255, 255, 0.55);
+}
+
+html[lang='fa'] {
+  --font-sans: 'Vazirmatn', 'Poppins', Tahoma, 'Segoe UI', sans-serif;
+}
+
+/* ---- Text colour tones (light) ---- */
+[data-tone='warm'] {
+  --color-ink: #3b2a1d;
+  --color-ink-soft: #6b5342;
+  --color-muted: #8a7261;
+}
+
+[data-tone='cool'] {
+  --color-ink: #1d2a3b;
+  --color-ink-soft: #44566d;
+  --color-muted: #6f8298;
+}
+
+[data-tone='graphite'] {
+  --color-ink: #101012;
+  --color-ink-soft: #3f3f46;
+  --color-muted: #71717a;
+}
+
+/* ---- Night theme ---- */
+[data-theme='dark'] {
+  --color-white: #16161a;
+  --color-ink: #f3f3f5;
+  --color-ink-soft: #c9c9d1;
+  --color-muted: #9a9aa5;
+  --color-cream: #241a11;
+  --color-cream-deep: #33251a;
+  --color-mist: #1d1d22;
+  --color-line: #2d2d35;
+  --glass-sheen: rgba(255, 255, 255, 0.12);
+  --glass-edge: rgba(255, 255, 255, 0.16);
+  color-scheme: dark;
+}
+
+/* ---- Text colour tones (night) ---- */
+[data-theme='dark'][data-tone='warm'] {
+  --color-ink: #f7ebdd;
+  --color-ink-soft: #dcc6af;
+  --color-muted: #ae9680;
+}
+
+[data-theme='dark'][data-tone='cool'] {
+  --color-ink: #e8f0fb;
+  --color-ink-soft: #bccbdf;
+  --color-muted: #93a6bd;
+}
+
+[data-theme='dark'][data-tone='graphite'] {
+  --color-ink: #ffffff;
+  --color-ink-soft: #d4d4d8;
+  --color-muted: #a1a1aa;
+}
+
+/* ---- Keep white ink and dark fills readable on the night theme ---- */
+[data-theme='dark'] .text-white,
+[data-theme='dark'] .hover\:text-white:hover {
+  color: #ffffff;
+}
+
+[data-theme='dark'] .bg-ink {
+  background-color: #2b2b33;
+}
+
+/* ---- Frosted glass surfaces ---- */
+.glass {
+  background:
+    linear-gradient(
+      140deg,
+      color-mix(in srgb, var(--color-brand) 12%, transparent),
+      transparent 55%
+    ),
+    color-mix(in srgb, var(--color-white) 55%, transparent);
+  border: 1px solid var(--glass-edge);
+  box-shadow:
+    0 26px 60px -26px rgba(20, 20, 24, 0.42),
+    inset 0 1px 0 var(--glass-sheen);
+  -webkit-backdrop-filter: blur(20px) saturate(165%);
+  backdrop-filter: blur(20px) saturate(165%);
+}
+
+.glass-control {
+  background:
+    linear-gradient(
+      140deg,
+      color-mix(in srgb, var(--color-brand) 14%, transparent),
+      transparent 60%
+    ),
+    color-mix(in srgb, var(--color-white) 45%, transparent);
+  border: 1px solid var(--glass-edge);
+  box-shadow: inset 0 1px 0 var(--glass-sheen);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  backdrop-filter: blur(14px) saturate(150%);
+}
+
+.glass-selected {
+  background:
+    linear-gradient(
+      140deg,
+      color-mix(in srgb, var(--color-brand) 18%, transparent),
+      transparent 70%
+    ),
+    color-mix(in srgb, var(--color-white) 72%, transparent);
+  box-shadow:
+    inset 0 1px 0 var(--glass-sheen),
+    0 10px 24px -16px rgba(20, 20, 24, 0.55);
 }

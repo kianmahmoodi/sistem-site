@@ -3,6 +3,7 @@ import { MessageSquarePlus, Quote, Star } from 'lucide-react';
 import { api, ApiError } from '../lib/api';
 import { formatDate, initials } from '../lib/format';
 import type { Review } from '../lib/types';
+import { usePrefs } from '../store/prefs';
 import { useToast } from '../store/toast';
 import { Modal } from './Modal';
 import { Reveal } from './Reveal';
@@ -17,6 +18,7 @@ const avatarGradients = [
 
 export function ReviewsSection() {
   const { push } = useToast();
+  const { t } = usePrefs();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [average, setAverage] = useState(0);
   const [count, setCount] = useState(0);
@@ -37,18 +39,18 @@ export function ReviewsSection() {
         setAverage(data.average);
         setCount(data.count);
       })
-      .catch(() => push('Could not load reviews', 'error'))
+      .catch(() => push(t('Could not load reviews'), 'error'))
       .finally(() => setLoading(false));
-  }, [push]);
+  }, [push, t]);
 
   const submit = async () => {
     setError('');
     if (name.trim().length < 2) {
-      setError('Please tell us your name.');
+      setError(t('Please tell us your name.'));
       return;
     }
     if (body.trim().length < 10) {
-      setError('Your review should be at least 10 characters.');
+      setError(t('Your review should be at least 10 characters.'));
       return;
     }
     setSubmitting(true);
@@ -58,9 +60,9 @@ export function ReviewsSection() {
         body: { name: name.trim(), rating, body: body.trim() },
       });
       setSent(result.message);
-      push('Thanks for sharing your experience!');
+      push(t('Thanks for sharing your experience!'));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Could not submit your review.');
+      setError(err instanceof ApiError ? err.message : t('Could not submit your review.'));
     } finally {
       setSubmitting(false);
     }
@@ -80,19 +82,24 @@ export function ReviewsSection() {
       <div className="container-page">
         <Reveal className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">Guest love</span>
+            <span className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">
+              {t('Guest love')}
+            </span>
             <h2 className="mt-3 text-[clamp(2rem,4vw,2.9rem)] font-extrabold leading-tight">
-              Customer Reviews
+              {t('Customer Reviews')}
             </h2>
             <p className="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted">
               <Stars rating={average || 4.9} showValue />
               <span>
-                {average ? average.toFixed(1) : '4.9'} average from {count || 240} reviews
+                {t('{rating} average from {count} reviews', {
+                  rating: average ? average.toFixed(1) : '4.9',
+                  count: count || 240,
+                })}
               </span>
             </p>
           </div>
           <button type="button" className="btn-ghost self-start sm:self-auto" onClick={() => setOpen(true)}>
-            <MessageSquarePlus className="size-4" /> Write a review
+            <MessageSquarePlus className="size-4" /> {t('Write a review')}
           </button>
         </Reveal>
 
@@ -137,12 +144,12 @@ export function ReviewsSection() {
         </div>
       </div>
 
-      <Modal open={open} onClose={closeModal} title="Write a review">
+      <Modal open={open} onClose={closeModal} title={t('Write a review')}>
         {sent ? (
           <div className="space-y-4">
             <p className="rounded-2xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-700">{sent}</p>
             <button type="button" className="btn-primary w-full" onClick={closeModal}>
-              Done
+              {t('Done')}
             </button>
           </div>
         ) : (
@@ -155,7 +162,7 @@ export function ReviewsSection() {
           >
             <div>
               <label htmlFor="review-name" className="mb-1.5 block text-xs font-semibold text-ink-soft">
-                Your name
+                {t('Your name')}
               </label>
               <input
                 id="review-name"
@@ -168,8 +175,8 @@ export function ReviewsSection() {
             </div>
 
             <div>
-              <span className="mb-1.5 block text-xs font-semibold text-ink-soft">Your rating</span>
-              <div className="flex items-center gap-1.5" role="radiogroup" aria-label="Rating">
+              <span className="mb-1.5 block text-xs font-semibold text-ink-soft">{t('Your rating')}</span>
+              <div className="flex items-center gap-1.5" role="radiogroup" aria-label={t('Rating')}>
                 {[1, 2, 3, 4, 5].map((value) => (
                   <button
                     key={value}
@@ -196,7 +203,7 @@ export function ReviewsSection() {
 
             <div>
               <label htmlFor="review-body" className="mb-1.5 block text-xs font-semibold text-ink-soft">
-                Your review
+                {t('Your review')}
               </label>
               <textarea
                 id="review-body"
@@ -205,7 +212,7 @@ export function ReviewsSection() {
                 rows={4}
                 maxLength={600}
                 className="field resize-none"
-                placeholder="Tell us about your last meal…"
+                placeholder={t('Tell us about your last meal…')}
               />
               <p className="mt-1 text-right text-[11px] text-muted">{body.length}/600</p>
             </div>
@@ -217,10 +224,10 @@ export function ReviewsSection() {
             )}
 
             <button type="submit" className="btn-primary w-full" disabled={submitting}>
-              {submitting ? 'Sending…' : 'Submit review'}
+              {submitting ? t('Sending…') : t('Submit review')}
             </button>
             <p className="text-center text-[11px] text-muted">
-              Reviews are published after a quick check by our team.
+              {t('Reviews are published after a quick check by our team.')}
             </p>
           </form>
         )}

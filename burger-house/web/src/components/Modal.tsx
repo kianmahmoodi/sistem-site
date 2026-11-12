@@ -33,7 +33,7 @@ export function Modal({ open, onClose, title, children, size = 'md', labelledBy 
         type="button"
         aria-label="Close dialog"
         onClick={onClose}
-        className="absolute inset-0 cursor-default bg-ink/45 backdrop-blur-[2px]"
+        className="absolute inset-0 cursor-default bg-black/55 backdrop-blur-[2px]"
         style={{ animation: 'fade-in 0.2s ease-out' }}
       />
       <div

@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react';
 import { ArrowRight, BadgeCheck, Clock3, Star } from 'lucide-react';
 import { money } from '../lib/format';
+import { usePrefs } from '../store/prefs';
 import { useSettings } from '../store/settings';
 
 export function HeroSlider() {
   const settings = useSettings();
+  const { t } = usePrefs();
   const slides = settings.hero.length > 0 ? settings.hero : [];
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -64,13 +66,13 @@ export function HeroSlider() {
 
             <div className="mt-7 flex flex-wrap items-center gap-3">
               <button type="button" onClick={() => scrollTo('menu')} className="btn-primary group">
-                Order Now
+                {t('Order Now')}
                 <span className="grid size-6 place-items-center rounded-full bg-white/20 transition group-hover:translate-x-0.5">
-                  <ArrowRight className="size-3.5" />
+                  <ArrowRight className="size-3.5 rtl:rotate-180" />
                 </span>
               </button>
               <button type="button" onClick={() => scrollTo('deals')} className="btn-ghost">
-                View Hot Deals
+                {t('View Hot Deals')}
               </button>
             </div>
 
@@ -88,14 +90,14 @@ export function HeroSlider() {
                   ))}
                 </div>
                 <div className="text-xs leading-tight">
-                  <p className="font-bold text-ink">10,000+ happy customers</p>
-                  <p className="text-muted">4.9 average rating</p>
+                  <p className="font-bold text-ink">{t('10,000+ happy customers')}</p>
+                  <p className="text-muted">{t('4.9 average rating')}</p>
                 </div>
               </div>
               <div className="hidden h-8 w-px bg-line sm:block" aria-hidden />
               <div className="flex items-center gap-2 text-xs font-semibold text-ink-soft">
                 <Clock3 className="size-4 text-brand" />
-                Delivered in 30 min
+                {t('Delivered in 30 min')}
               </div>
             </div>
           </div>
@@ -127,13 +129,13 @@ export function HeroSlider() {
             </div>
 
             <div className="absolute -left-2 top-6 rounded-2xl bg-white/95 px-4 py-3 shadow-soft backdrop-blur sm:left-0">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">Starting at</p>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-muted">{t('Starting at')}</p>
               <p className="text-xl font-extrabold text-brand">{money(slide.price)}</p>
             </div>
 
             <div className="absolute -right-1 top-1/2 flex items-center gap-2 rounded-full bg-white/95 px-4 py-2.5 shadow-soft backdrop-blur sm:-right-3">
               <BadgeCheck className="size-4 text-success" />
-              <span className="text-xs font-semibold">100% Fresh Beef</span>
+              <span className="text-xs font-semibold">{t('100% Fresh Beef')}</span>
             </div>
 
             <div className="absolute -bottom-2 left-4 flex items-center gap-3 rounded-2xl bg-white/95 px-4 py-3 shadow-soft backdrop-blur sm:left-8">
@@ -142,7 +144,7 @@ export function HeroSlider() {
               </span>
               <div>
                 <p className="text-sm font-bold leading-none">4.9 / 5</p>
-                <p className="mt-1 text-[11px] text-muted">2,480 reviews</p>
+                <p className="mt-1 text-[11px] text-muted">{t('2,480 reviews')}</p>
               </div>
             </div>
           </div>
