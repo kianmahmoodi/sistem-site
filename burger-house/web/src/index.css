@@ -36,6 +36,43 @@
   src: url('/fonts/poppins-800.woff2') format('woff2');
 }
 
+/* Persian typeface: switched in automatically whenever the site language is fa. */
+@font-face {
+  font-family: 'Vazirmatn';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/vazirmatn-Regular.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Vazirmatn';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/vazirmatn-Medium.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Vazirmatn';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/vazirmatn-SemiBold.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Vazirmatn';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/vazirmatn-Bold.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Vazirmatn';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('/fonts/vazirmatn-ExtraBold.woff2') format('woff2');
+}
+
 @theme {
   --font-sans: 'Poppins', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
 
@@ -270,6 +307,20 @@ html[lang='fa'] {
   --font-sans: 'Vazirmatn', 'Poppins', Tahoma, 'Segoe UI', sans-serif;
 }
 
+html[lang='fa'] body {
+  font-family: 'Vazirmatn', 'Poppins', Tahoma, 'Segoe UI', sans-serif;
+  letter-spacing: 0;
+  line-height: 1.75;
+}
+
+html[lang='fa'] h1,
+html[lang='fa'] h2,
+html[lang='fa'] h3,
+html[lang='fa'] h4 {
+  letter-spacing: 0;
+  line-height: 1.5;
+}
+
 /* ---- Text colour tones (light) ---- */
 [data-tone='warm'] {
   --color-ink: #3b2a1d;
@@ -375,4 +426,107 @@ html[lang='fa'] {
   box-shadow:
     inset 0 1px 0 var(--glass-sheen),
     0 10px 24px -16px rgba(20, 20, 24, 0.55);
+}
+
+/* ============================================================
+   Opening animation: the header arrives as one whole burger,
+   splits in half and the two halves fly apart to open the nav.
+   ============================================================ */
+
+.bh-intro-burger {
+  animation: bh-burger-pop 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  transform-origin: center;
+}
+
+@keyframes bh-burger-pop {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.72);
+  }
+  60% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+}
+
+.bh-intro-half-left {
+  animation: bh-half-left 0.95s cubic-bezier(0.55, 0.05, 0.85, 0.2) forwards;
+}
+
+.bh-intro-half-right {
+  animation: bh-half-right 0.95s cubic-bezier(0.55, 0.05, 0.85, 0.2) forwards;
+}
+
+@keyframes bh-half-left {
+  0% {
+    transform: translateX(0) rotate(0deg);
+  }
+  100% {
+    transform: translateX(-58vw) rotate(-14deg) scale(0.86);
+  }
+}
+
+@keyframes bh-half-right {
+  0% {
+    transform: translateX(0) rotate(0deg);
+  }
+  100% {
+    transform: translateX(58vw) rotate(14deg) scale(0.86);
+  }
+}
+
+.bh-intro-out {
+  animation: bh-intro-fade 0.95s ease 0.35s forwards;
+}
+
+@keyframes bh-intro-fade {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.bh-header-open {
+  animation: bh-header-open 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.55s both;
+}
+
+@keyframes bh-header-open {
+  0% {
+    opacity: 0;
+    transform: scaleX(0.35) translateY(-14px);
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Receipt printing from the cashier POS */
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+
+  .receipt-print,
+  .receipt-print * {
+    visibility: visible !important;
+  }
+
+  .receipt-print {
+    position: fixed;
+    inset: 0;
+    width: 320px;
+    margin: 0 auto;
+    color: #000;
+    background: #fff;
+  }
 }

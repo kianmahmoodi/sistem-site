@@ -3,11 +3,25 @@ import { pool, query, migrate } from './db.js';
 import {
   clearSession,
   currentUser,
+  generateTotpSecret,
   hashPassword,
+  isStaff,
+  otpauthUrl,
+  rateLimit,
   requireAuth,
+  requireStaff,
+  resetRateLimit,
+  revokeRequestSession,
   setSession,
   verifyPassword,
+  verifyTotp,
 } from './auth.js';
+import { logActivity } from './logs.js';
+import { ensurePanelRows, getPanelState, requirePanelAccess, startPanelScheduler } from './panels.js';
+import { broadcast, sseHandler } from './realtime.js';
+import staffRouter from './staff.js';
+import posRouter from './pos.js';
+import superRouter from './superadmin.js';
 import {
   ORDER_STATUSES,
   computeTotals,
@@ -42,6 +56,13 @@ app.get('/api/health', (_req, res) => res.json({ ok: true }));
 
 /* ------------------------------- auth ---------------------------------- */
 
+export function redirectForRole(role) {
+  if (role === 'super_admin') return '/admin';
+  if (role === 'manager') return '/manager';
+  if (role === 'cashier') return '/cashier';
+  return '/account';
+}
+
 app.post('/api/auth/register', async (req, res, next) => {
   try {
     const name = String(req.body?.name || '').trim();
@@ -59,39 +80,191 @@ app.post('/api/auth/register', async (req, res, next) => {
     }
 
     const { rows } = await query(
-      'INSERT INTO users (name, email, phone, password_hash, role) VALUES ($1, $2, $3, $4, $5) RETURNING id, name, email, phone, role',
-      [name, email, phone || null, hashPassword(password), 'customer']
+      `INSERT INTO users (name, email, phone, password_hash, role, status)
+       VALUES ($1, $2, $3, $4, 'customer', 'active') RETURNING id, name, email, phone, role`,
+      [name, email, phone || null, hashPassword(password)]
     );
-    setSession(res, rows[0].id);
-    res.status(201).json({ user: rows[0] });
+    await setSession(req, res, rows[0].id);
+    await logActivity({ actor: rows[0], action: 'auth.register', detail: 'New customer account', ip: req.ip });
+    res.status(201).json({ user: rows[0], redirect: '/account' });
   } catch (error) {
     next(error);
   }
 });
 
-app.post('/api/auth/login', async (req, res, next) => {
+app.post('/api/auth/login', rateLimit(), async (req, res, next) => {
   try {
-    const email = String(req.body?.email || '').trim().toLowerCase();
+    const identifier = String(req.body?.email || req.body?.username || '').trim().toLowerCase();
     const password = String(req.body?.password || '');
-    const { rows } = await query('SELECT * FROM users WHERE email = $1', [email]);
+    const remember = Boolean(req.body?.remember);
+
+    const { rows } = await query(
+      `SELECT * FROM users WHERE lower(email) = $1 OR lower(username) = $1 ORDER BY id LIMIT 1`,
+      [identifier]
+    );
     const user = rows[0];
     if (!user || !verifyPassword(password, user.password_hash)) {
+      await logActivity({ actorName: identifier || 'unknown', action: 'auth.login_failed', detail: 'Bad credentials', ip: req.ip });
       return res.status(401).json({ error: 'Incorrect email or password.' });
     }
-    setSession(res, user.id);
-    res.json({ user: { id: user.id, name: user.name, email: user.email, phone: user.phone, role: user.role } });
+    if (user.status !== 'active') {
+      return res.status(403).json({
+        error:
+          user.status === 'locked'
+            ? 'This account has been locked. Please contact the administrator.'
+            : 'This account has been disabled. Please contact the administrator.',
+      });
+    }
+    if (user.two_factor_enabled && user.two_factor_secret) {
+      const code = String(req.body?.code || '');
+      if (!code) {
+        return res.status(200).json({ requires2fa: true, message: 'Enter the 6-digit code from your authenticator app.' });
+      }
+      if (!verifyTotp(user.two_factor_secret, code)) {
+        return res.status(401).json({ error: 'That verification code is not valid.' });
+      }
+    }
+
+    await setSession(req, res, user.id, { remember });
+    resetRateLimit(req);
+    await logActivity({ actor: user, action: 'auth.login', detail: `Signed in as ${user.role}`, ip: req.ip });
+
+    const redirect = redirectForRole(user.role);
+    res.json({
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        username: user.username,
+        phone: user.phone,
+        role: user.role,
+      },
+      redirect,
+    });
   } catch (error) {
     next(error);
   }
 });
 
-app.post('/api/auth/logout', (_req, res) => {
+app.post('/api/auth/logout', async (req, res) => {
+  await revokeRequestSession(req);
+  if (req.user) await logActivity({ actor: req.user, action: 'auth.logout', detail: 'Signed out', ip: req.ip });
   clearSession(res);
   res.json({ ok: true });
 });
 
-app.get('/api/auth/me', (req, res) => {
-  res.json({ user: req.user || null });
+app.post('/api/auth/forgot-password', async (req, res) => {
+  const email = String(req.body?.email || '').trim().toLowerCase();
+  await logActivity({ actorName: email || 'unknown', action: 'auth.password_reset_requested', detail: 'Reset requested', ip: req.ip });
+  res.json({
+    message: 'If that account exists, a password reset request has been sent to the administrators.',
+  });
+});
+
+app.get('/api/auth/me', async (req, res, next) => {
+  try {
+    let panel = null;
+    if (req.user && isStaff(req.user.role) && req.user.role !== 'super_admin') {
+      panel = await getPanelState(req.user.role);
+    }
+    res.json({ user: req.user || null, panel });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post('/api/auth/password', requireAuth, async (req, res, next) => {
+  try {
+    const current = String(req.body?.currentPassword || '');
+    const nextPassword = String(req.body?.newPassword || '');
+    if (nextPassword.length < 6) return res.status(400).json({ error: 'Password must be at least 6 characters.' });
+    const { rows } = await query('SELECT password_hash FROM users WHERE id = $1', [req.user.id]);
+    if (!rows[0] || !verifyPassword(current, rows[0].password_hash)) {
+      return res.status(400).json({ error: 'Your current password is not correct.' });
+    }
+    await query('UPDATE users SET password_hash = $1, updated_at = now() WHERE id = $2', [
+      hashPassword(nextPassword),
+      req.user.id,
+    ]);
+    // Changing a password ends every other session.
+    await query(
+      `UPDATE sessions SET revoked_at = now() WHERE user_id = $1 AND revoked_at IS NULL`,
+      [req.user.id]
+    );
+    await setSession(req, res, req.user.id, { remember: true });
+    await logActivity({ actor: req.user, action: 'auth.password_changed', detail: 'Password updated', ip: req.ip });
+    res.json({ ok: true });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get('/api/auth/2fa', requireAuth, (req, res) => {
+  res.json({ enabled: Boolean(req.user.two_factor_enabled) });
+});
+
+app.post('/api/auth/2fa/setup', requireAuth, async (req, res, next) => {
+  try {
+    if (req.user.two_factor_enabled) {
+      return res.status(400).json({ error: 'Two-factor authentication is already enabled.' });
+    }
+    const secret = generateTotpSecret();
+    await query('UPDATE users SET two_factor_secret = $1 WHERE id = $2', [secret, req.user.id]);
+    res.json({ secret, otpauth: otpauthUrl(secret, req.user.email) });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post('/api/auth/2fa/enable', requireAuth, async (req, res, next) => {
+  try {
+    const { rows } = await query('SELECT two_factor_secret FROM users WHERE id = $1', [req.user.id]);
+    const secret = rows[0]?.two_factor_secret;
+    if (!secret) return res.status(400).json({ error: 'Start the setup again to receive a secret.' });
+    if (!verifyTotp(secret, req.body?.code)) {
+      return res.status(400).json({ error: 'That code is not valid. Please try the next one.' });
+    }
+    await query('UPDATE users SET two_factor_enabled = true WHERE id = $1', [req.user.id]);
+    await logActivity({ actor: req.user, action: 'auth.2fa_enabled', detail: 'Two-factor enabled', ip: req.ip });
+    res.json({ ok: true, enabled: true });
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post('/api/auth/2fa/disable', requireAuth, async (req, res, next) => {
+  try {
+    const { rows } = await query('SELECT password_hash, two_factor_secret FROM users WHERE id = $1', [req.user.id]);
+    const record = rows[0];
+    if (!record || !verifyPassword(String(req.body?.password || ''), record.password_hash)) {
+      return res.status(400).json({ error: 'Your password is not correct.' });
+    }
+    if (record.two_factor_secret && !verifyTotp(record.two_factor_secret, req.body?.code)) {
+      return res.status(400).json({ error: 'That verification code is not valid.' });
+    }
+    await query(
+      'UPDATE users SET two_factor_enabled = false, two_factor_secret = NULL WHERE id = $1',
+      [req.user.id]
+    );
+    await logActivity({ actor: req.user, action: 'auth.2fa_disabled', detail: 'Two-factor disabled', ip: req.ip });
+    res.json({ ok: true, enabled: false });
+  } catch (error) {
+    next(error);
+  }
+});
+
+/* ---------------------------- live updates ------------------------------ */
+
+app.get('/api/events', sseHandler);
+
+app.get('/api/staff/me', requireStaff, async (req, res, next) => {
+  try {
+    const panel =
+      req.user.role === 'super_admin' ? null : await getPanelState(req.user.role, { fresh: true });
+    res.json({ user: req.user, panel, redirect: redirectForRole(req.user.role) });
+  } catch (error) {
+    next(error);
+  }
 });
 
 /* ------------------------------ catalog --------------------------------- */
@@ -308,6 +481,16 @@ app.post('/api/orders', async (req, res, next) => {
     }
     await client.query('COMMIT');
 
+    await logActivity({
+      actor: req.user || null,
+      actorName: name,
+      actorRole: req.user?.role || 'guest',
+      action: 'order.created',
+      detail: `Online order ${orderNumber} · ${totals.total.toFixed(2)}`,
+      ip: req.ip,
+    });
+    broadcast('orders', { action: 'created', orderId: order.id, orderNumber });
+
     res.status(201).json({ order: serializeOrder(order, savedItems) });
   } catch (error) {
     try {
@@ -410,6 +593,9 @@ app.post('/api/newsletter', async (req, res, next) => {
 });
 
 app.use('/api/admin', adminRouter);
+app.use('/api/staff', staffRouter);
+app.use('/api/pos', posRouter);
+app.use('/api/super', superRouter);
 
 app.use((_req, res) => res.status(404).json({ error: 'Not found.' }));
 
@@ -420,6 +606,8 @@ app.use((error, _req, res, _next) => {
 
 async function start() {
   await migrate();
+  await ensurePanelRows();
+  startPanelScheduler();
   app.listen(PORT, '0.0.0.0', () => {
     console.log(`[api] Burger House API listening on ${PORT}`);
   });

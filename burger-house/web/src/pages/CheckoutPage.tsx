@@ -6,6 +6,7 @@ import { money } from '../lib/format';
 import type { Order, Product } from '../lib/types';
 import { useAuth } from '../store/auth';
 import { useCart } from '../store/cart';
+import { usePrefs } from '../store/prefs';
 import { useSettings } from '../store/settings';
 import { useToast } from '../store/toast';
 
@@ -16,6 +17,7 @@ export function CheckoutPage() {
   const settings = useSettings();
   const { user } = useAuth();
   const { push } = useToast();
+  const { t } = usePrefs();
   const navigate = useNavigate();
   const totals = totalsFor(settings);
 
@@ -92,10 +94,10 @@ export function CheckoutPage() {
           <span className="mx-auto grid size-20 place-items-center rounded-full bg-cream text-brand">
             <ShoppingBag className="size-9" strokeWidth={1.6} />
           </span>
-          <h1 className="mt-5 text-2xl font-bold">Your bag is empty</h1>
-          <p className="mt-2 text-sm text-muted">Add something delicious before checking out.</p>
+          <h1 className="mt-5 text-2xl font-bold">{t('Your bag is empty')}</h1>
+          <p className="mt-2 text-sm text-muted">{t('Add a burger and we will get grilling.')}</p>
           <Link to="/" className="btn-primary mt-6">
-            Browse the menu
+            {t('Browse the menu')}
           </Link>
         </div>
       </main>
@@ -105,13 +107,13 @@ export function CheckoutPage() {
   return (
     <main id="main" className="container-page py-10">
       <button type="button" onClick={() => navigate(-1)} className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-muted transition hover:text-brand">
-        <ArrowLeft className="size-4" /> Back
+        <ArrowLeft className="size-4" /> {t('Back')}
       </button>
 
       <div className="grid gap-6 lg:grid-cols-[1.25fr_0.75fr] lg:items-start">
         <section className="surface-card p-6 sm:p-8">
-          <h1 className="text-2xl font-extrabold sm:text-3xl">Checkout</h1>
-          <p className="mt-1 text-sm text-muted">Delivery details, then we get cooking.</p>
+          <h1 className="text-2xl font-extrabold sm:text-3xl">{t('Checkout')}</h1>
+          <p className="mt-1 text-sm text-muted">{t('Delivery details')}</p>
 
           <form
             className="mt-7 space-y-5"
@@ -123,7 +125,7 @@ export function CheckoutPage() {
             <div className="grid gap-4 sm:grid-cols-2">
               <div>
                 <label htmlFor="checkout-name" className="mb-1.5 block text-xs font-semibold text-ink-soft">
-                  Full name *
+                  {t('Full name')} *
                 </label>
                 <input
                   id="checkout-name"
@@ -143,7 +145,7 @@ export function CheckoutPage() {
 
               <div>
                 <label htmlFor="checkout-phone" className="mb-1.5 block text-xs font-semibold text-ink-soft">
-                  Phone number *
+                  {t('Phone number')} *
                 </label>
                 <input
                   id="checkout-phone"
@@ -161,7 +163,7 @@ export function CheckoutPage() {
 
             <div>
               <label htmlFor="checkout-email" className="mb-1.5 block text-xs font-semibold text-ink-soft">
-                Email *
+                {t('Email')} *
               </label>
               <input
                 id="checkout-email"
@@ -178,7 +180,7 @@ export function CheckoutPage() {
 
             <div>
               <label htmlFor="checkout-address" className="mb-1.5 block text-xs font-semibold text-ink-soft">
-                Delivery address *
+                {t('Delivery address')} *
               </label>
               <textarea
                 id="checkout-address"
@@ -195,7 +197,7 @@ export function CheckoutPage() {
 
             <div>
               <label htmlFor="checkout-notes" className="mb-1.5 block text-xs font-semibold text-ink-soft">
-                Additional instructions
+                {t('Additional instructions')}
               </label>
               <textarea
                 id="checkout-notes"
@@ -209,7 +211,7 @@ export function CheckoutPage() {
             </div>
 
             <fieldset>
-              <legend className="mb-2 text-xs font-semibold text-ink-soft">Payment method</legend>
+              <legend className="mb-2 text-xs font-semibold text-ink-soft">{t('Payment method')}</legend>
               <div className="space-y-2.5">
                 <label className="flex cursor-pointer items-start gap-3 rounded-2xl border border-brand/40 bg-cream/60 px-4 py-3.5">
                   <input
@@ -222,10 +224,10 @@ export function CheckoutPage() {
                   />
                   <span className="flex-1">
                     <span className="flex items-center gap-2 text-sm font-semibold">
-                      <Banknote className="size-4 text-brand" /> Cash on delivery
+                      <Banknote className="size-4 text-brand" /> {t('Cash on delivery')}
                     </span>
                     <span className="mt-0.5 block text-xs text-muted">
-                      Pay the driver when your order arrives.
+                      {t('Pay the driver when your order arrives.')}
                     </span>
                   </span>
                 </label>
@@ -234,10 +236,10 @@ export function CheckoutPage() {
                   <input type="radio" name="payment" value="online" disabled className="mt-0.5 size-4" />
                   <span className="flex-1">
                     <span className="flex items-center gap-2 text-sm font-semibold">
-                      <CreditCard className="size-4" /> Online payment
+                      <CreditCard className="size-4" /> {t('Online payment')}
                     </span>
                     <span className="mt-0.5 block text-xs text-muted">
-                      Card payments activate as soon as a payment provider is connected.
+                      {t('Card payments activate as soon as a payment provider is connected.')}
                     </span>
                   </span>
                 </label>
@@ -252,16 +254,16 @@ export function CheckoutPage() {
 
             <button type="submit" className="btn-primary w-full text-base" disabled={submitting}>
               <Lock className="size-4" />
-              {submitting ? 'Placing order…' : `Place order · ${money(totals.total)}`}
+              {submitting ? t('Placing order…') : `${t('Place order')} · ${money(totals.total)}`}
             </button>
             <p className="text-center text-[11px] text-muted">
-              No payment is taken online. Your order is confirmed by our team within minutes.
+              {t('No payment is taken online. Your order is confirmed by our team within minutes.')}
             </p>
           </form>
         </section>
 
         <aside className="surface-card sticky top-28 p-6">
-          <h2 className="text-lg font-bold">Order summary</h2>
+          <h2 className="text-lg font-bold">{t('Order summary')}</h2>
 
           <ul className="mt-4 space-y-3">
             {items.map((line) => (

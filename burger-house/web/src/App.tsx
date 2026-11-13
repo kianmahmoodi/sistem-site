@@ -1,15 +1,20 @@
 import { useEffect } from 'react';
 import { Route, Routes, useLocation } from 'react-router-dom';
+import { BurgerIntro } from './components/BurgerIntro';
 import { CartDrawer } from './components/CartDrawer';
 import { Footer } from './components/Footer';
 import { Header } from './components/Header';
 import { AccountPage } from './pages/AccountPage';
-import { AdminPage } from './pages/AdminPage';
+import { CashierPage } from './pages/CashierPage';
 import { CheckoutPage } from './pages/CheckoutPage';
 import { HomePage } from './pages/HomePage';
 import { LegalPage } from './pages/LegalPage';
 import { LoginPage } from './pages/LoginPage';
+import { ManagerPage } from './pages/ManagerPage';
 import { OrderPage } from './pages/OrderPage';
+import { SuperAdminPage } from './pages/SuperAdminPage';
+
+const STAFF_PREFIXES = ['/admin', '/manager', '/cashier'];
 
 function ScrollToTop() {
   const { pathname } = useLocation();
@@ -21,12 +26,13 @@ function ScrollToTop() {
 
 export default function App() {
   const { pathname } = useLocation();
-  const isAdmin = pathname.startsWith('/admin');
+  const isStaff = STAFF_PREFIXES.some((prefix) => pathname.startsWith(prefix));
 
   return (
     <div className="flex min-h-screen flex-col">
       <ScrollToTop />
-      {!isAdmin && <Header />}
+      {!isStaff && <BurgerIntro />}
+      {!isStaff && <Header />}
 
       <div className="flex-1">
         <Routes>
@@ -35,8 +41,12 @@ export default function App() {
           <Route path="/order/:orderNumber" element={<OrderPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/account" element={<AccountPage />} />
-          <Route path="/admin" element={<AdminPage />} />
-          <Route path="/admin/:section" element={<AdminPage />} />
+          <Route path="/admin" element={<SuperAdminPage />} />
+          <Route path="/admin/:section" element={<SuperAdminPage />} />
+          <Route path="/manager" element={<ManagerPage />} />
+          <Route path="/manager/:section" element={<ManagerPage />} />
+          <Route path="/cashier" element={<CashierPage />} />
+          <Route path="/cashier/:section" element={<CashierPage />} />
           <Route
             path="/privacy"
             element={
@@ -95,7 +105,7 @@ export default function App() {
         </Routes>
       </div>
 
-      {!isAdmin && <Footer />}
+      {!isStaff && <Footer />}
       <CartDrawer />
     </div>
   );

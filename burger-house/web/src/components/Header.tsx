@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, Sandwich, ShoppingBag, UserRound, X } from 'lucide-react';
+import { redirectForRole } from '../store/auth';
 import { useAuth } from '../store/auth';
 import { useCart } from '../store/cart';
 import { usePrefs } from '../store/prefs';
@@ -24,6 +25,13 @@ export function Header() {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [active, setActive] = useState('top');
+  const intro = useRef(false);
+  if (!intro.current && typeof window !== 'undefined') {
+    intro.current = !window.sessionStorage.getItem('bh-intro-played');
+    if (intro.current) window.sessionStorage.setItem('bh-intro-played', '1');
+  }
+  const accountPath = user ? redirectForRole(user.role) : '/login';
+  const isStaffAccount = user ? ['super_admin', 'manager', 'cashier'].includes(user.role) : false;
 
   useEffect(() => {
     setMobileOpen(false);
@@ -85,7 +93,9 @@ export function Header() {
       <div className="container-page">
         <nav
           aria-label="Primary"
-          className="flex items-center justify-between gap-3 rounded-[26px] border border-line/70 bg-white/92 px-3 py-2.5 shadow-nav backdrop-blur-md sm:px-5"
+          className={`flex items-center justify-between gap-3 rounded-[26px] border border-line/70 bg-white/92 px-3 py-2.5 shadow-nav backdrop-blur-md sm:px-5 ${
+            intro.current ? 'bh-header-open' : ''
+          }`}
         >
           <Link to="/" className="flex shrink-0 items-center gap-2.5" aria-label={`${settings.name} home`}>
             <span className="grid size-11 place-items-center rounded-full bg-brand text-white shadow-[0_12px_24px_-14px_rgba(245,130,32,0.9)]">
@@ -119,8 +129,8 @@ export function Header() {
             <SiteSettingsMenu />
 
             <Link
-              to={user ? (user.role === 'admin' ? '/admin' : '/account') : '/login'}
-              aria-label={user ? t('Your account') : t('Sign in')}
+              to={accountPath}
+              aria-label={user ? t(isStaffAccount ? 'Your panel' : 'Your account') : t('Sign in')}
               className="grid size-10 place-items-center rounded-full border border-line text-ink-soft transition duration-300 hover:border-brand/40 hover:text-brand"
             >
               <UserRound className="size-[18px]" />
@@ -173,7 +183,7 @@ export function Header() {
             ))}
             <li className="pt-1">
               <Link
-                to={user ? (user.role === 'admin' ? '/admin' : '/account') : '/login'}
+                to={accountPath}
                 className="block rounded-2xl bg-mist px-4 py-3 text-sm font-semibold text-ink"
               >
                 {user ? user.name.split(' ')[0] : t('Sign in / Register')}

@@ -15,10 +15,16 @@ CREATE TABLE IF NOT EXISTS users (
   id SERIAL PRIMARY KEY,
   name TEXT NOT NULL,
   email TEXT UNIQUE NOT NULL,
+  username TEXT,
   phone TEXT,
   password_hash TEXT NOT NULL,
   role TEXT NOT NULL DEFAULT 'customer',
-  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+  status TEXT NOT NULL DEFAULT 'active',
+  last_login_at TIMESTAMPTZ,
+  two_factor_enabled BOOLEAN NOT NULL DEFAULT false,
+  two_factor_secret TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 CREATE TABLE IF NOT EXISTS categories (
@@ -106,8 +112,115 @@ CREATE TABLE IF NOT EXISTS settings (
   data JSONB NOT NULL
 );
 
+CREATE TABLE IF NOT EXISTS sessions (
+  id SERIAL PRIMARY KEY,
+  user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  token_hash TEXT UNIQUE NOT NULL,
+  ip TEXT,
+  user_agent TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  expires_at TIMESTAMPTZ NOT NULL,
+  revoked_at TIMESTAMPTZ
+);
+
+CREATE TABLE IF NOT EXISTS activity_logs (
+  id SERIAL PRIMARY KEY,
+  user_id INT REFERENCES users(id) ON DELETE SET NULL,
+  actor_name TEXT NOT NULL DEFAULT 'System',
+  actor_role TEXT NOT NULL DEFAULT 'system',
+  action TEXT NOT NULL,
+  detail TEXT NOT NULL DEFAULT '',
+  ip TEXT,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS inventory (
+  id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
+  unit TEXT NOT NULL DEFAULT 'pcs',
+  quantity NUMERIC(12,2) NOT NULL DEFAULT 0,
+  threshold NUMERIC(12,2) NOT NULL DEFAULT 0,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS inventory_logs (
+  id SERIAL PRIMARY KEY,
+  item_id INT NOT NULL REFERENCES inventory(id) ON DELETE CASCADE,
+  change NUMERIC(12,2) NOT NULL,
+  quantity_after NUMERIC(12,2) NOT NULL,
+  note TEXT NOT NULL DEFAULT '',
+  user_id INT REFERENCES users(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS employee_shifts (
+  id SERIAL PRIMARY KEY,
+  user_id INT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+  started_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  ended_at TIMESTAMPTZ,
+  note TEXT NOT NULL DEFAULT ''
+);
+
+CREATE TABLE IF NOT EXISTS payments (
+  id SERIAL PRIMARY KEY,
+  order_id INT NOT NULL REFERENCES orders(id) ON DELETE CASCADE,
+  method TEXT NOT NULL DEFAULT 'cash',
+  amount NUMERIC(10,2) NOT NULL DEFAULT 0,
+  status TEXT NOT NULL DEFAULT 'paid',
+  cashier_id INT REFERENCES users(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS panel_schedules (
+  id SERIAL PRIMARY KEY,
+  panel_name TEXT UNIQUE NOT NULL,
+  role_id INT,
+  is_enabled BOOLEAN NOT NULL DEFAULT true,
+  schedule_enabled BOOLEAN NOT NULL DEFAULT false,
+  lock_time TEXT NOT NULL DEFAULT '08:00',
+  unlock_time TEXT NOT NULL DEFAULT '23:00',
+  selected_days JSONB NOT NULL DEFAULT '[0,1,2,3,4,5,6]'::jsonb,
+  windows JSONB NOT NULL DEFAULT '[]'::jsonb,
+  timezone TEXT NOT NULL DEFAULT 'Asia/Tehran',
+  manual_override TEXT NOT NULL DEFAULT 'auto',
+  override_expiration TIMESTAMPTZ,
+  updated_by INT REFERENCES users(id) ON DELETE SET NULL,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS panel_access_states (
+  panel_name TEXT PRIMARY KEY,
+  mode TEXT NOT NULL DEFAULT 'auto',
+  override_expires_at TIMESTAMPTZ,
+  reason TEXT,
+  updated_by INT REFERENCES users(id) ON DELETE SET NULL,
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
 CREATE INDEX IF NOT EXISTS orders_status_idx ON orders (status);
 CREATE INDEX IF NOT EXISTS orders_created_idx ON orders (created_at DESC);
+CREATE INDEX IF NOT EXISTS sessions_user_idx ON sessions (user_id);
+CREATE INDEX IF NOT EXISTS activity_logs_created_idx ON activity_logs (created_at DESC);
+CREATE INDEX IF NOT EXISTS inventory_logs_item_idx ON inventory_logs (item_id);
+`;
+
+// Applied after SCHEMA so existing installations pick up the new columns too.
+const MIGRATIONS = `
+ALTER TABLE users ADD COLUMN IF NOT EXISTS username TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS status TEXT NOT NULL DEFAULT 'active';
+ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login_at TIMESTAMPTZ;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS two_factor_enabled BOOLEAN NOT NULL DEFAULT false;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS two_factor_secret TEXT;
+ALTER TABLE users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT now();
+CREATE UNIQUE INDEX IF NOT EXISTS users_username_unique ON users (lower(username)) WHERE username IS NOT NULL;
+
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS channel TEXT NOT NULL DEFAULT 'online';
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS created_by INT REFERENCES users(id) ON DELETE SET NULL;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS cashier_name TEXT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS cancel_reason TEXT;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_status TEXT NOT NULL DEFAULT 'unpaid';
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS paid_at TIMESTAMPTZ;
 `;
 
 const CATEGORIES = [
@@ -152,6 +265,8 @@ export const DEFAULT_SETTINGS = {
   email: 'contact@burgerhouse.com',
   address: '1200 Sunset Boulevard, Los Angeles, CA 90026',
   hours: 'Mon – Sun · 11:00 AM – 11:00 PM',
+  timezone: 'Asia/Tehran',
+  currency: '$',
   deliveryFee: 3.5,
   freeDeliveryOver: 30,
   taxRate: 0.08,
@@ -271,11 +386,49 @@ async function seed() {
     );
   }
 
-  await query(
-    `INSERT INTO users (name, email, password_hash, role) VALUES ($1, $2, $3, 'admin')
-     ON CONFLICT (email) DO NOTHING`,
-    ['Burger House Admin', 'admin@burgerhouse.com', hashPassword('admin123')]
-  );
+  // The legacy single administrator account becomes a manager.
+  await query(`UPDATE users SET role = 'manager' WHERE role = 'admin'`);
+
+  // One-time creation of the initial super administrator. The bootstrap
+  // credentials can be overridden with SUPER_ADMIN_EMAIL / SUPER_ADMIN_PASSWORD.
+  const bootEmail = (process.env.SUPER_ADMIN_EMAIL || 'afshin51@gmail.com').trim().toLowerCase();
+  const bootPassword = process.env.SUPER_ADMIN_PASSWORD || '1375Af';
+  const { rows: superRows } = await query(`SELECT id FROM users WHERE role = 'super_admin' LIMIT 1`);
+  if (superRows.length === 0) {
+    await query(
+      `INSERT INTO users (name, email, username, phone, password_hash, role, status)
+       VALUES ($1, $2, $3, $4, $5, 'super_admin', 'active')
+       ON CONFLICT (email) DO NOTHING`,
+      ['Afshin', bootEmail, 'afshin', null, hashPassword(bootPassword)]
+    );
+    await query(
+      `UPDATE users SET role = 'super_admin', status = 'active'
+       WHERE lower(email) = $1
+         AND NOT EXISTS (SELECT 1 FROM users WHERE role = 'super_admin' AND lower(email) <> $1)`,
+      [bootEmail]
+    );
+  }
+
+  const { rows: inventoryRows } = await query('SELECT count(*)::int AS count FROM inventory');
+  if (inventoryRows[0].count === 0) {
+    for (const [name, unit, quantity, threshold] of [
+      ['Beef patties', 'pcs', 180, 60],
+      ['Brioche buns', 'pcs', 220, 80],
+      ['Aged cheddar slices', 'pcs', 140, 60],
+      ['Lettuce', 'kg', 9, 4],
+      ['Tomatoes', 'kg', 12, 5],
+      ['Potatoes', 'kg', 40, 15],
+      ['Cola cans', 'pcs', 96, 48],
+      ['House sauce', 'l', 6, 2],
+    ]) {
+      await query('INSERT INTO inventory (name, unit, quantity, threshold) VALUES ($1, $2, $3, $4)', [
+        name,
+        unit,
+        quantity,
+        threshold,
+      ]);
+    }
+  }
 
   const { rows: settingsRows } = await query('SELECT id FROM settings WHERE id = 1');
   if (settingsRows.length === 0) {
@@ -292,6 +445,7 @@ export async function migrate() {
   for (;;) {
     try {
       await query(SCHEMA);
+      await query(MIGRATIONS);
       await seed();
       return;
     } catch (error) {

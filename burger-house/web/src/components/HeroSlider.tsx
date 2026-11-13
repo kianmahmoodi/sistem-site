@@ -53,16 +53,16 @@ export function HeroSlider() {
           <div key={`copy-${index}`} style={{ animation: 'fade-up 0.6s cubic-bezier(0.22,1,0.36,1)' }}>
             <span className="inline-flex items-center gap-2 rounded-full border border-brand/20 bg-cream px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-brand">
               <span className="size-1.5 rounded-full bg-brand" aria-hidden />
-              {slide.eyebrow}
+              {t(slide.eyebrow)}
             </span>
 
             <h1 className="mt-5 text-[clamp(2.75rem,6.4vw,4.75rem)] font-extrabold leading-[0.95] tracking-[-0.03em]">
               {slide.title}
             </h1>
             <p className="mt-4 max-w-md text-lg font-medium text-ink-soft sm:text-xl">
-              {slide.subtitle}
+              {t(slide.subtitle)}
             </p>
-            <p className="mt-3 max-w-md text-sm leading-relaxed text-muted">{slide.note}</p>
+            <p className="mt-3 max-w-md text-sm leading-relaxed text-muted">{t(slide.note)}</p>
 
             <div className="mt-7 flex flex-wrap items-center gap-3">
               <button type="button" onClick={() => scrollTo('menu')} className="btn-primary group">

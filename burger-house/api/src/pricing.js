@@ -6,15 +6,19 @@ export const ORDER_STATUSES = [
   'confirmed',
   'preparing',
   'ready',
+  'completed',
   'delivered',
   'cancelled',
 ];
+
+export const ACTIVE_ORDER_STATUSES = ['pending', 'confirmed', 'preparing', 'ready'];
 
 export const STATUS_LABELS = {
   pending: 'Pending',
   confirmed: 'Confirmed',
   preparing: 'Preparing',
-  ready: 'Ready for Delivery',
+  ready: 'Ready',
+  completed: 'Completed',
   delivered: 'Delivered',
   cancelled: 'Cancelled',
 };
@@ -35,6 +39,8 @@ export function publicSettings(settings) {
     email: settings.email,
     address: settings.address,
     hours: settings.hours,
+    timezone: settings.timezone,
+    currency: settings.currency || '$',
     deliveryFee: Number(settings.deliveryFee),
     freeDeliveryOver: Number(settings.freeDeliveryOver),
     taxRate: Number(settings.taxRate),
@@ -92,6 +98,10 @@ export function serializeOrder(row, items = []) {
     status: row.status,
     statusLabel: STATUS_LABELS[row.status] || row.status,
     paymentMethod: row.payment_method,
+    paymentStatus: row.payment_status || 'unpaid',
+    channel: row.channel || 'online',
+    cashierName: row.cashier_name || null,
+    cancelReason: row.cancel_reason || null,
     customer: {
       name: row.customer_name,
       phone: row.phone,

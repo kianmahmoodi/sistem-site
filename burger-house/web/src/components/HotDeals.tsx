@@ -88,10 +88,10 @@ export function HotDeals() {
                   <Zap className="size-3.5" /> {t('Limited time')}
                 </span>
                 <h2 className="mt-4 text-[clamp(2rem,4vw,3rem)] font-extrabold leading-tight">
-                  {deal.title}
+                  {t(deal.title)}
                 </h2>
-                <p className="mt-1 text-base font-semibold text-ink-soft">{deal.subtitle}</p>
-                <p className="mt-3 max-w-md text-sm leading-relaxed text-muted">{deal.description}</p>
+                <p className="mt-1 text-base font-semibold text-ink-soft">{t(deal.subtitle)}</p>
+                <p className="mt-3 max-w-md text-sm leading-relaxed text-muted">{t(deal.description)}</p>
 
                 <div className="mt-6 flex flex-wrap items-end gap-3">
                   <span className="text-[clamp(2rem,4vw,2.75rem)] font-extrabold leading-none text-brand">

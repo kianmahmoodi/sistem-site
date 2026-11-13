@@ -1,4 +1,5 @@
 import { Facebook, Instagram, Music2, Twitter } from 'lucide-react';
+import { usePrefs } from '../store/prefs';
 import { useSettings } from '../store/settings';
 import { Reveal } from './Reveal';
 
@@ -11,6 +12,7 @@ const gallery = [
 
 export function SocialSection() {
   const settings = useSettings();
+  const { t } = usePrefs();
   const links = [
     { href: settings.social.facebook, label: 'Facebook', Icon: Facebook },
     { href: settings.social.instagram, label: 'Instagram', Icon: Instagram },
@@ -23,8 +25,8 @@ export function SocialSection() {
       <div className="container-page">
         <Reveal className="mx-auto max-w-xl text-center">
           <span className="text-xs font-semibold uppercase tracking-[0.18em] text-brand">@burgerhouse</span>
-          <h2 className="mt-3 text-[clamp(2rem,4vw,2.9rem)] font-extrabold leading-tight">Social Media</h2>
-          <p className="mt-2 text-sm text-muted">Follow us for updates and more!</p>
+          <h2 className="mt-3 text-[clamp(2rem,4vw,2.9rem)] font-extrabold leading-tight">{t('Social Media')}</h2>
+          <p className="mt-2 text-sm text-muted">{t('Follow us for updates and more!')}</p>
         </Reveal>
 
         <div className="mt-9 grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
