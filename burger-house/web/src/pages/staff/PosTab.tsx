@@ -49,12 +49,17 @@ export function PosTab() {
     if (!catalog) return [];
     return catalog.items.filter((product) => {
       if (category !== 'all' && product.category !== category) return false;
-      if (search.trim() && !`${product.name} ${product.description}`.toLowerCase().includes(search.trim().toLowerCase())) {
+      if (
+        search.trim() &&
+        !`${product.name} ${product.description} ${t(product.name)} ${t(product.description)}`
+          .toLowerCase()
+          .includes(search.trim().toLowerCase())
+      ) {
         return false;
       }
       return true;
     });
-  }, [catalog, category, search]);
+  }, [catalog, category, search, t]);
 
   const add = (product: Product) => {
     setCart((current) => {
@@ -161,7 +166,7 @@ export function PosTab() {
                   : 'border-white/10 bg-white/[0.03] text-[#a4a4ae] hover:border-white/25 hover:text-white'
               )}
             >
-              {item.name}
+              {t(item.name)}
             </button>
           ))}
         </div>
@@ -191,7 +196,7 @@ export function PosTab() {
                   )}
                 </div>
                 <div className="p-3">
-                  <p className="truncate text-sm font-semibold text-[#e7e7ec]">{product.name}</p>
+                  <p className="truncate text-sm font-semibold text-[#e7e7ec]">{t(product.name)}</p>
                   <p className="mt-0.5 text-sm font-bold text-[#ff8a77]">{money(product.finalPrice)}</p>
                 </div>
               </button>
@@ -209,7 +214,7 @@ export function PosTab() {
               {cart.map((line) => (
                 <li key={line.product.id} className="rounded-xl border border-white/10 bg-black/20 p-2.5">
                   <div className="flex items-start justify-between gap-2">
-                    <p className="min-w-0 flex-1 truncate text-sm font-medium text-[#e7e7ec]">{line.product.name}</p>
+                    <p className="min-w-0 flex-1 truncate text-sm font-medium text-[#e7e7ec]">{t(line.product.name)}</p>
                     <button
                       type="button"
                       onClick={() => setQuantity(line.product.id, 0)}
@@ -356,7 +361,7 @@ export function PosTab() {
               {receipt.items.map((item) => (
                 <li key={item.id} className="flex justify-between gap-2">
                   <span>
-                    {item.quantity} × {item.name}
+                    {item.quantity} × {t(item.name)}
                   </span>
                   <span>{money(item.lineTotal)}</span>
                 </li>

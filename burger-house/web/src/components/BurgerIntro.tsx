@@ -1,28 +1,24 @@
 import { useEffect, useState } from 'react';
 
-const STORAGE_KEY = 'bh-intro-played';
-
 /**
- * Opening moment for the site: the header arrives as one whole burger, splits
- * in half and the two halves fly apart, revealing the navigation underneath.
- * Plays once per browser session and never when the visitor asked for less motion.
+ * Opening moment for the site: the page opens on one whole burger, the burger
+ * splits down the middle and the two halves fly apart — one to the right, one
+ * to the left — revealing the navigation underneath.
+ *
+ * It plays on every fresh page load; visitors who asked for less motion skip it
+ * (the global reduced-motion rules also collapse its animations).
  */
 export function BurgerIntro() {
   const [stage, setStage] = useState<'whole' | 'split' | 'done'>(() => {
     if (typeof window === 'undefined') return 'done';
-    if (window.sessionStorage.getItem(STORAGE_KEY)) return 'done';
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      window.sessionStorage.setItem(STORAGE_KEY, '1');
-      return 'done';
-    }
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return 'done';
     return 'whole';
   });
 
   useEffect(() => {
     if (stage === 'done') return;
-    window.sessionStorage.setItem(STORAGE_KEY, '1');
-    const split = window.setTimeout(() => setStage('split'), 600);
-    const finish = window.setTimeout(() => setStage('done'), 2500);
+    const split = window.setTimeout(() => setStage('split'), 620);
+    const finish = window.setTimeout(() => setStage('done'), 2150);
     return () => {
       window.clearTimeout(split);
       window.clearTimeout(finish);
@@ -55,14 +51,14 @@ export function BurgerIntro() {
               stage === 'split' ? 'bh-intro-half-left' : ''
             }`}
           >
-            <img src="/img/hero-burger.jpg" alt="" className={`${image} start-0`} />
+            <img src="/img/burger-1.jpg" alt="" className={`${image} start-0`} />
           </div>
           <div
             className={`${half} end-0 rounded-e-full ${
               stage === 'split' ? 'bh-intro-half-right' : ''
             }`}
           >
-            <img src="/img/hero-burger.jpg" alt="" className={`${image} end-0`} />
+            <img src="/img/burger-1.jpg" alt="" className={`${image} end-0`} />
           </div>
         </div>
         <p className="mt-4 text-center text-[11px] font-semibold uppercase tracking-[0.4em] text-brand">

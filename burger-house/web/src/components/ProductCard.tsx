@@ -28,7 +28,7 @@ export function ProductCard({ product, onQuickView }: Props) {
 
   const add = () => {
     addItem(product);
-    push(t('{name} added to your bag', { name: product.name }));
+    push(t('{name} added to your bag', { name: t(product.name) }));
   };
 
   return (
@@ -44,7 +44,7 @@ export function ProductCard({ product, onQuickView }: Props) {
 
         {product.badge && (
           <span className={`badge absolute left-3 top-3 shadow-sm ${badgeStyles[product.badge] || 'bg-brand text-white'}`}>
-            {product.badge}
+            {t(product.badge)}
           </span>
         )}
 
@@ -60,8 +60,8 @@ export function ProductCard({ product, onQuickView }: Props) {
             toggle(product.id);
             push(
               favorite
-                ? t('{name} removed from favourites', { name: product.name })
-                : t('{name} saved to favourites', { name: product.name }),
+                ? t('{name} removed from favourites', { name: t(product.name) })
+                : t('{name} saved to favourites', { name: t(product.name) }),
               'info'
             );
           }}
@@ -87,12 +87,12 @@ export function ProductCard({ product, onQuickView }: Props) {
         <div className="flex items-center justify-between">
           <Stars rating={product.rating} showValue />
           <span className="text-[11px] font-medium uppercase tracking-wide text-muted">
-            {product.categoryName || t('Burgers')}
+            {t(product.categoryName || 'Burgers')}
           </span>
         </div>
 
-        <h3 className="mt-2 text-base font-semibold leading-snug">{product.name}</h3>
-        <p className="mt-1 line-clamp-2 text-[13px] leading-relaxed text-muted">{product.description}</p>
+        <h3 className="mt-2 text-base font-semibold leading-snug">{t(product.name)}</h3>
+        <p className="mt-1 line-clamp-2 text-[13px] leading-relaxed text-muted">{t(product.description)}</p>
 
         <div className="mt-auto flex items-center justify-between pt-4">
           <div className="flex items-baseline gap-2">
@@ -104,7 +104,7 @@ export function ProductCard({ product, onQuickView }: Props) {
           <button
             type="button"
             onClick={add}
-            aria-label={`Add ${product.name} to cart`}
+            aria-label={`Add ${t(product.name)} to cart`}
             className="grid size-10 place-items-center rounded-full bg-brand text-white shadow-[0_14px_26px_-16px_rgba(245,130,32,0.95)] transition duration-300 hover:bg-brand-deep active:scale-95"
           >
             <Plus className="size-5" />

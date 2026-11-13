@@ -39,17 +39,17 @@ export function QuickView({ product, onClose }: Props) {
 
         <div className="flex flex-col">
           <div className="flex items-center gap-2">
-            {product.badge && <span className="badge bg-brand/10 text-brand">{product.badge}</span>}
+            {product.badge && <span className="badge bg-brand/10 text-brand">{t(product.badge)}</span>}
             <Stars rating={product.rating} showValue />
           </div>
 
-          <h3 className="mt-3 text-2xl font-bold leading-tight">{product.name}</h3>
-          <p className="mt-2 text-sm leading-relaxed text-muted">{product.description}</p>
+          <h3 className="mt-3 text-2xl font-bold leading-tight">{t(product.name)}</h3>
+          <p className="mt-2 text-sm leading-relaxed text-muted">{t(product.description)}</p>
 
           <dl className="mt-5 grid grid-cols-2 gap-3 text-sm">
             <div className="rounded-2xl bg-mist px-4 py-3">
               <dt className="text-[11px] uppercase tracking-wide text-muted">{t('Category')}</dt>
-              <dd className="font-semibold">{product.categoryName || t('Burgers')}</dd>
+              <dd className="font-semibold">{t(product.categoryName || 'Burgers')}</dd>
             </div>
             <div className="rounded-2xl bg-mist px-4 py-3">
               <dt className="text-[11px] uppercase tracking-wide text-muted">{t('Ready in')}</dt>
@@ -90,7 +90,7 @@ export function QuickView({ product, onClose }: Props) {
               className="btn-primary flex-1"
               onClick={() => {
                 addItem(product, quantity);
-                push(t('{count} × {name} added to your bag', { count: quantity, name: product.name }));
+                push(t('{count} × {name} added to your bag', { count: quantity, name: t(product.name) }));
                 onClose();
                 openCart();
               }}

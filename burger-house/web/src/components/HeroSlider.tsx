@@ -57,7 +57,7 @@ export function HeroSlider() {
             </span>
 
             <h1 className="mt-5 text-[clamp(2.75rem,6.4vw,4.75rem)] font-extrabold leading-[0.95] tracking-[-0.03em]">
-              {slide.title}
+              {t(slide.title)}
             </h1>
             <p className="mt-4 max-w-md text-lg font-medium text-ink-soft sm:text-xl">
               {t(slide.subtitle)}
@@ -118,7 +118,7 @@ export function HeroSlider() {
               />
               <img
                 src={slide.image}
-                alt={slide.title}
+                alt={t(slide.title)}
                 fetchPriority="high"
                 className="absolute inset-0 size-full scale-[1.04] object-cover animate-float-slow"
               />

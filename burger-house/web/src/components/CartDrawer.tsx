@@ -134,17 +134,17 @@ export function CartDrawer() {
                 <li key={line.id} className="flex gap-3 rounded-2xl border border-line/80 p-2.5">
                   <img
                     src={line.image}
-                    alt={line.name}
+                    alt={t(line.name)}
                     className="size-[70px] shrink-0 rounded-xl object-cover"
                     loading="lazy"
                   />
                   <div className="flex min-w-0 flex-1 flex-col">
                     <div className="flex items-start justify-between gap-2">
-                      <p className="truncate text-sm font-semibold">{line.name}</p>
+                      <p className="truncate text-sm font-semibold">{t(line.name)}</p>
                       <button
                         type="button"
                         onClick={() => removeItem(line.id)}
-                        aria-label={`Remove ${line.name}`}
+                        aria-label={`Remove ${t(line.name)}`}
                         className="text-muted transition hover:text-danger"
                       >
                         <Trash2 className="size-4" />
@@ -158,7 +158,7 @@ export function CartDrawer() {
                         <button
                           type="button"
                           onClick={() => setQuantity(line.id, line.quantity - 1)}
-                          aria-label={`Decrease ${line.name} quantity`}
+                          aria-label={`Decrease ${t(line.name)} quantity`}
                           className="grid size-7 place-items-center rounded-full transition hover:bg-mist"
                         >
                           <Minus className="size-3.5" />
@@ -167,7 +167,7 @@ export function CartDrawer() {
                         <button
                           type="button"
                           onClick={() => setQuantity(line.id, line.quantity + 1)}
-                          aria-label={`Increase ${line.name} quantity`}
+                          aria-label={`Increase ${t(line.name)} quantity`}
                           className="grid size-7 place-items-center rounded-full transition hover:bg-mist"
                         >
                           <Plus className="size-3.5" />

@@ -140,7 +140,7 @@ export function OrderPage() {
                 <li key={item.id} className="flex items-center gap-3 py-3">
                   <img src={item.image} alt={item.name} className="size-14 rounded-xl object-cover" loading="lazy" />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold">{item.name}</p>
+                    <p className="truncate text-sm font-semibold">{t(item.name)}</p>
                     <p className="text-xs text-muted">
                       {item.quantity} × {money(item.unitPrice)}
                     </p>

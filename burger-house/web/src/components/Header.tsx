@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, Sandwich, ShoppingBag, UserRound, X } from 'lucide-react';
 import { redirectForRole } from '../store/auth';
@@ -25,11 +25,6 @@ export function Header() {
   const location = useLocation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const [active, setActive] = useState('top');
-  const intro = useRef(false);
-  if (!intro.current && typeof window !== 'undefined') {
-    intro.current = !window.sessionStorage.getItem('bh-intro-played');
-    if (intro.current) window.sessionStorage.setItem('bh-intro-played', '1');
-  }
   const accountPath = user ? redirectForRole(user.role) : '/login';
   const isStaffAccount = user ? ['super_admin', 'manager', 'cashier'].includes(user.role) : false;
 
@@ -93,9 +88,7 @@ export function Header() {
       <div className="container-page">
         <nav
           aria-label="Primary"
-          className={`flex items-center justify-between gap-3 rounded-[26px] border border-line/70 bg-white/92 px-3 py-2.5 shadow-nav backdrop-blur-md sm:px-5 ${
-            intro.current ? 'bh-header-open' : ''
-          }`}
+          className="bh-header-open flex items-center justify-between gap-3 rounded-[26px] border border-line/70 bg-white/92 px-3 py-2.5 shadow-nav backdrop-blur-md sm:px-5"
         >
           <Link to="/" className="flex shrink-0 items-center gap-2.5" aria-label={`${settings.name} home`}>
             <span className="grid size-11 place-items-center rounded-full bg-brand text-white shadow-[0_12px_24px_-14px_rgba(245,130,32,0.9)]">

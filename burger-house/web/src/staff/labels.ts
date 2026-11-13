@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { translate } from '../i18n';
 import { usePrefs } from '../store/prefs';
 
 // Bilingual labels for the three staff panels. English is the key, so any
@@ -253,7 +254,9 @@ export function useAdminT() {
   const { lang } = usePrefs();
   return useCallback(
     (key: string, vars?: Record<string, string | number>) => {
-      const template = lang === 'fa' ? fa[key] ?? key : key;
+      if (lang !== 'fa') return key;
+      const template = fa[key];
+      if (!template) return translate('fa', key, vars);
       if (!vars) return template;
       return template.replace(/\{(\w+)\}/g, (match, name: string) =>
         name in vars ? String(vars[name]) : match

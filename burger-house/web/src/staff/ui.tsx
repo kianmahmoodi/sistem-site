@@ -174,13 +174,16 @@ export function Bars({ series }: { series: { day: string; revenue: number }[] })
   return (
     <div className="flex h-44 items-end gap-1.5" role="img" aria-label="Revenue by day">
       {series.map((row) => (
-        <div key={row.day} className="group relative flex flex-1 flex-col items-center justify-end gap-1.5">
+        <div
+          key={row.day}
+          className="group relative flex h-full max-w-[46px] flex-1 flex-col items-center justify-end gap-1.5"
+        >
           <span className="pointer-events-none absolute -top-7 hidden whitespace-nowrap rounded-md bg-black/90 px-2 py-1 text-[10px] text-white group-hover:block">
             {row.day} · {row.revenue.toFixed(2)}
           </span>
           <div
             className="w-full rounded-t-md bg-gradient-to-t from-[#e8412f] to-[#ff7a52] transition group-hover:opacity-90"
-            style={{ height: `${Math.max(4, (row.revenue / max) * 100)}%` }}
+            style={{ height: `${Math.max(6, Math.round((row.revenue / max) * 140))}px` }}
           />
           <span className="text-[9px] text-[#61616b]">{row.day.slice(5)}</span>
         </div>

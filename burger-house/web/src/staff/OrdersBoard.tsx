@@ -263,7 +263,7 @@ export function OrdersBoard({
           <ul className="mt-4 divide-y divide-white/[0.06] rounded-xl border border-white/10">
             {selected.items.map((item) => (
               <li key={item.id} className="flex items-center gap-3 px-4 py-2.5 text-sm">
-                <span className="min-w-0 flex-1 truncate text-[#e7e7ec]">{item.name}</span>
+                <span className="min-w-0 flex-1 truncate text-[#e7e7ec]">{t(item.name)}</span>
                 <span className="text-xs text-[#7c7c87]">
                   {item.quantity} × {money(item.unitPrice)}
                 </span>

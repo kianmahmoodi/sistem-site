@@ -1,3 +1,5 @@
+import { CONTENT } from './i18n.content';
+
 export type Lang = 'en' | 'fa' | 'de' | 'fr' | 'it';
 
 export type LanguageOption = {
@@ -43,6 +45,7 @@ const fa: Dictionary = {
   Language: 'زبان',
   'Order Now': 'همین حالا سفارش بده',
   'View Hot Deals': 'دیدن پیشنهادهای ویژه',
+  'Hot Deals': 'پیشنهادهای ویژه',
   '10,000+ happy customers': 'بیش از ۱۰٬۰۰۰ مشتری راضی',
   '4.9 average rating': 'میانگین امتیاز ۴.۹',
   'Delivered in 30 min': 'تحویل در ۳۰ دقیقه',
@@ -295,6 +298,7 @@ const de: Dictionary = {
   Language: 'Sprache',
   'Order Now': 'Jetzt bestellen',
   'View Hot Deals': 'Angebote ansehen',
+  'Hot Deals': 'Top-Angebote',
   '10,000+ happy customers': 'Über 10.000 glückliche Gäste',
   '4.9 average rating': 'Ø 4,9 Bewertung',
   'Delivered in 30 min': 'Lieferung in 30 Min.',
@@ -451,6 +455,7 @@ const fr: Dictionary = {
   Language: 'Langue',
   'Order Now': 'Commander maintenant',
   'View Hot Deals': 'Voir les offres',
+  'Hot Deals': 'Offres du moment',
   '10,000+ happy customers': 'Plus de 10 000 clients ravis',
   '4.9 average rating': 'Note moyenne de 4,9',
   'Delivered in 30 min': 'Livré en 30 min',
@@ -607,6 +612,7 @@ const it: Dictionary = {
   Language: 'Lingua',
   'Order Now': 'Ordina ora',
   'View Hot Deals': 'Vedi le offerte',
+  'Hot Deals': 'Offerte del momento',
   '10,000+ happy customers': 'Oltre 10.000 clienti felici',
   '4.9 average rating': 'Valutazione media 4,9',
   'Delivered in 30 min': 'Consegna in 30 min',
@@ -736,7 +742,13 @@ const it: Dictionary = {
   'Could not apply that code': 'Impossibile applicare il codice',
 };
 
-const dictionaries: Record<Lang, Dictionary> = { en: {}, fa, de, fr, it };
+const dictionaries: Record<Lang, Dictionary> = {
+  en: {},
+  fa: { ...fa, ...CONTENT.fa },
+  de: { ...de, ...CONTENT.de },
+  fr: { ...fr, ...CONTENT.fr },
+  it: { ...it, ...CONTENT.it },
+};
 
 export function isLang(value: unknown): value is Lang {
   return typeof value === 'string' && value in dictionaries;

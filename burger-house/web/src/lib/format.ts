@@ -5,16 +5,28 @@ export const money = (value: number) =>
 
 export const round2 = (value: number) => Math.round((value + Number.EPSILON) * 100) / 100;
 
+const LOCALES: Record<string, string> = {
+  en: 'en-US',
+  fa: 'fa-IR',
+  de: 'de-DE',
+  fr: 'fr-FR',
+  it: 'it-IT',
+};
+
+/** Locale of the language currently selected in the site settings. */
+const currentLocale = () =>
+  (typeof document !== 'undefined' && LOCALES[document.documentElement.lang]) || 'en-US';
+
 export const formatDate = (value: string) => {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return '';
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  return date.toLocaleDateString(currentLocale(), { month: 'short', day: 'numeric', year: 'numeric' });
 };
 
 export const formatDateTime = (value: string) => {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return '';
-  return date.toLocaleString('en-US', {
+  return date.toLocaleString(currentLocale(), {
     month: 'short',
     day: 'numeric',
     hour: 'numeric',

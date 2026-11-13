@@ -268,9 +268,9 @@ export function CheckoutPage() {
           <ul className="mt-4 space-y-3">
             {items.map((line) => (
               <li key={line.id} className="flex items-center gap-3">
-                <img src={line.image} alt={line.name} className="size-14 rounded-xl object-cover" loading="lazy" />
+                <img src={line.image} alt={t(line.name)} className="size-14 rounded-xl object-cover" loading="lazy" />
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-semibold">{line.name}</p>
+                  <p className="truncate text-sm font-semibold">{t(line.name)}</p>
                   <p className="text-xs text-muted">
                     {line.quantity} × {money(line.price)}
                   </p>
@@ -294,25 +294,25 @@ export function CheckoutPage() {
 
             <dl className="space-y-2 text-sm">
               <div className="flex justify-between text-ink-soft">
-                <dt>Subtotal</dt>
+                <dt>{t('Subtotal')}</dt>
                 <dd>{money(totals.subtotal)}</dd>
               </div>
               {totals.discount > 0 && (
                 <div className="flex justify-between text-emerald-600">
-                  <dt>Discount</dt>
+                  <dt>{t('Discount')}</dt>
                   <dd>-{money(totals.discount)}</dd>
                 </div>
               )}
               <div className="flex justify-between text-ink-soft">
-                <dt>Delivery</dt>
+                <dt>{t('Delivery')}</dt>
                 <dd>{totals.deliveryFee === 0 ? 'Free' : money(totals.deliveryFee)}</dd>
               </div>
               <div className="flex justify-between text-ink-soft">
-                <dt>Tax ({(settings.taxRate * 100).toFixed(0)}%)</dt>
+                <dt>{t('Tax ({rate}%)', { rate: (settings.taxRate * 100).toFixed(0) })}</dt>
                 <dd>{money(totals.tax)}</dd>
               </div>
               <div className="flex justify-between border-t border-dashed border-line pt-3 text-base font-bold">
-                <dt>Total</dt>
+                <dt>{t('Total')}</dt>
                 <dd className="text-brand">{money(totals.total)}</dd>
               </div>
             </dl>

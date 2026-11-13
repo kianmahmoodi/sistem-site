@@ -53,25 +53,49 @@ Environment variables used by the API: `DATABASE_URL`, `PORT`, `SESSION_SECRET`.
 The web app only needs `API_PROXY_TARGET` (defaults to `http://api:8000`) when the API
 is not reachable at that address.
 
-## Admin access
+## Staff sign-in and panels
 
-Seeded administrator — change the password before going live:
+There is one sign-in page for everybody — customers and staff — at `/login`. After a
+successful login the role decides where the account lands:
 
-```
-admin@burgerhouse.com
-admin123
-```
+| Role          | Panel   | What it covers                                                              |
+| ------------- | ------- | --------------------------------------------------------------------------- |
+| `super_admin` | `/admin`  | Everything: revenue, orders, products, inventory, customers, reviews, users & roles, panel access, reports, activity log, settings |
+| `manager`     | `/manager`| Today's sales, order board, inventory, staff, reports, best sellers          |
+| `cashier`     | `/cashier`| POS (in-store and phone orders), order board, shifts, receipts               |
+| `customer`    | `/account`| Order history and profile                                                   |
 
-Sign in at `/login`; the dashboard lives at `/admin` (products, orders, reviews,
-customers, settings, discount codes).
+The first super administrator is created once at first boot from
+`SUPER_ADMIN_EMAIL` / `SUPER_ADMIN_PASSWORD` (defaults in `api/src/db.js` — change them
+before going live). That account can then create managers and cashiers under
+**Users & Roles**; no other role can create, edit or delete staff accounts, and every
+staff endpoint checks the role and the panel state on the server.
+
+**Panel access control** (`/admin/panels`) locks or unlocks the manager and cashier
+panels per panel, per weekday and per time window in the restaurant's timezone, with
+manual overrides (optionally expiring) and an emergency lock. A locked panel rejects its
+API calls (`423`) and drops the sessions of that panel, so the lock screen cannot be
+bypassed by refreshing or typing another URL. The super administrator is never locked
+out.
+
+## Site language, theme and the opening animation
+
+The palette button in the header switches day/night, text size, text colour tone and the
+site language (English, فارسی, Deutsch, Français, Italiano). The choice is stored in the
+browser; Persian switches the whole layout to RTL and to the bundled Vazirmatn font, and
+menu, hero and deal copy are translated alongside the interface (`web/src/i18n.ts` and
+`web/src/i18n.content.ts`). On every fresh page load the header arrives as one whole
+burger that splits in half and flies apart to open the navigation.
 
 ## Seed data
 
 Schema and seed run automatically at API start (`api/src/db.js`). The seed creates the
 six categories, 16 products, four published reviews, the `WELCOME10` (10% off) and
-`BURGER5` ($5 off over $25) codes, the admin user and the site settings. Resetting a
-database means dropping the volume or truncating the tables; the seed fills empty
-tables again.
+`BURGER5` ($5 off over $25) codes, the panel schedules, the first super administrator
+and the site settings. It also keeps one demo manager account
+(`admin@burgerhouse.com`) — disable or delete it once your own staff accounts exist.
+Resetting a database means dropping the volume or truncating the tables; the seed fills
+empty tables again.
 
 ## Notes
 
