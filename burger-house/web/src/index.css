@@ -1,0 +1,532 @@
+@import 'tailwindcss';
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/poppins-400.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/poppins-500.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/poppins-600.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/poppins-700.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('/fonts/poppins-800.woff2') format('woff2');
+}
+
+/* Persian typeface: switched in automatically whenever the site language is fa. */
+@font-face {
+  font-family: 'Vazirmatn';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/vazirmatn-Regular.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Vazirmatn';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/vazirmatn-Medium.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Vazirmatn';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/vazirmatn-SemiBold.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Vazirmatn';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/vazirmatn-Bold.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Vazirmatn';
+  font-style: normal;
+  font-weight: 800;
+  font-display: swap;
+  src: url('/fonts/vazirmatn-ExtraBold.woff2') format('woff2');
+}
+
+@theme {
+  --font-sans: 'Poppins', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --color-brand: #f58220;
+  --color-brand-soft: #f9a23b;
+  --color-brand-deep: #d96b0c;
+  --color-ink: #252525;
+  --color-ink-soft: #4a4a4a;
+  --color-muted: #7c7c7c;
+  --color-cream: #fff5e9;
+  --color-cream-deep: #ffe9cf;
+  --color-mist: #f5f5f5;
+  --color-line: #eeeeee;
+  --color-success: #28a745;
+  --color-danger: #e74c3c;
+
+  --shadow-soft: 0 24px 60px -32px rgba(37, 37, 37, 0.42);
+  --shadow-card: 0 18px 40px -28px rgba(37, 37, 37, 0.45);
+  --shadow-nav: 0 18px 40px -26px rgba(37, 37, 37, 0.35);
+
+  --radius-4xl: 2rem;
+  --radius-5xl: 2.75rem;
+
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-float-slow: float 11s ease-in-out infinite;
+  --animate-spin-slow: spin 26s linear infinite;
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-16px);
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(26px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pop-in {
+  0% {
+    opacity: 0;
+    transform: translateY(18px) scale(0.97);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    font-size: calc(16px * var(--text-scale, 1));
+  }
+
+  body {
+    @apply bg-white text-ink font-sans antialiased;
+    overflow-x: hidden;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-bold tracking-tight text-ink;
+  }
+
+  ::selection {
+    background: var(--color-brand);
+    color: #fff;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 3px;
+    border-radius: 6px;
+  }
+
+  input,
+  textarea,
+  select,
+  button {
+    font-family: inherit;
+  }
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-[1240px] px-4 sm:px-6 lg:px-8;
+  }
+
+  .section-pad {
+    @apply py-16 sm:py-20 lg:py-24;
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition:
+      opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
+  }
+
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-brand px-7 py-3.5 text-sm font-semibold text-white shadow-[0_16px_30px_-16px_rgba(245,130,32,0.9)] transition duration-300 hover:bg-brand-deep hover:shadow-[0_20px_34px_-14px_rgba(245,130,32,0.85)] active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded-full border border-line bg-white px-7 py-3.5 text-sm font-semibold text-ink transition duration-300 hover:border-brand/40 hover:text-brand active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .btn-soft {
+    @apply inline-flex items-center justify-center gap-2 rounded-full bg-cream px-6 py-3 text-sm font-semibold text-ink transition duration-300 hover:bg-cream-deep active:scale-[0.97];
+  }
+
+  .field {
+    @apply w-full rounded-2xl border border-line bg-white px-4 py-3 text-sm text-ink shadow-[inset_0_1px_2px_rgba(37,37,37,0.03)] transition placeholder:text-muted/70 focus:border-brand focus:ring-4 focus:ring-brand/10 focus:outline-none;
+  }
+
+  .surface-card {
+    @apply rounded-4xl border border-line/80 bg-white shadow-card;
+  }
+
+  .chip {
+    @apply inline-flex shrink-0 items-center gap-2 rounded-full border border-line bg-white px-4 py-2 text-sm font-medium text-ink-soft transition duration-300 hover:border-brand/40 hover:text-brand;
+  }
+
+  .chip-active {
+    @apply border-transparent bg-brand text-white shadow-[0_12px_24px_-16px_rgba(245,130,32,0.9)] hover:bg-brand hover:text-white;
+  }
+
+  .badge {
+    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.08em];
+  }
+
+  .no-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .skeleton {
+    @apply relative overflow-hidden rounded-2xl bg-mist;
+  }
+
+  .skeleton::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.75), transparent);
+    animation: shimmer 1.6s infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* ============================================================
+   Display preferences (text size, text colour tone, day/night)
+   Applied through data attributes on <html> by PrefsProvider.
+   ============================================================ */
+
+:root {
+  --text-scale: 1;
+  --glass-sheen: rgba(255, 255, 255, 0.72);
+  --glass-edge: rgba(255, 255, 255, 0.55);
+}
+
+html[lang='fa'] {
+  --font-sans: 'Vazirmatn', 'Poppins', Tahoma, 'Segoe UI', sans-serif;
+}
+
+html[lang='fa'] body {
+  font-family: 'Vazirmatn', 'Poppins', Tahoma, 'Segoe UI', sans-serif;
+  letter-spacing: 0;
+  line-height: 1.75;
+}
+
+html[lang='fa'] h1,
+html[lang='fa'] h2,
+html[lang='fa'] h3,
+html[lang='fa'] h4 {
+  letter-spacing: 0;
+  line-height: 1.5;
+}
+
+/* ---- Text colour tones (light) ---- */
+[data-tone='warm'] {
+  --color-ink: #3b2a1d;
+  --color-ink-soft: #6b5342;
+  --color-muted: #8a7261;
+}
+
+[data-tone='cool'] {
+  --color-ink: #1d2a3b;
+  --color-ink-soft: #44566d;
+  --color-muted: #6f8298;
+}
+
+[data-tone='graphite'] {
+  --color-ink: #101012;
+  --color-ink-soft: #3f3f46;
+  --color-muted: #71717a;
+}
+
+/* ---- Night theme ---- */
+[data-theme='dark'] {
+  --color-white: #16161a;
+  --color-ink: #f3f3f5;
+  --color-ink-soft: #c9c9d1;
+  --color-muted: #9a9aa5;
+  --color-cream: #241a11;
+  --color-cream-deep: #33251a;
+  --color-mist: #1d1d22;
+  --color-line: #2d2d35;
+  --glass-sheen: rgba(255, 255, 255, 0.12);
+  --glass-edge: rgba(255, 255, 255, 0.16);
+  color-scheme: dark;
+}
+
+/* ---- Text colour tones (night) ---- */
+[data-theme='dark'][data-tone='warm'] {
+  --color-ink: #f7ebdd;
+  --color-ink-soft: #dcc6af;
+  --color-muted: #ae9680;
+}
+
+[data-theme='dark'][data-tone='cool'] {
+  --color-ink: #e8f0fb;
+  --color-ink-soft: #bccbdf;
+  --color-muted: #93a6bd;
+}
+
+[data-theme='dark'][data-tone='graphite'] {
+  --color-ink: #ffffff;
+  --color-ink-soft: #d4d4d8;
+  --color-muted: #a1a1aa;
+}
+
+/* ---- Keep white ink and dark fills readable on the night theme ---- */
+[data-theme='dark'] .text-white,
+[data-theme='dark'] .hover\:text-white:hover {
+  color: #ffffff;
+}
+
+[data-theme='dark'] .bg-ink {
+  background-color: #2b2b33;
+}
+
+/* ---- Frosted glass surfaces ---- */
+.glass {
+  background:
+    linear-gradient(
+      140deg,
+      color-mix(in srgb, var(--color-brand) 12%, transparent),
+      transparent 55%
+    ),
+    color-mix(in srgb, var(--color-white) 55%, transparent);
+  border: 1px solid var(--glass-edge);
+  box-shadow:
+    0 26px 60px -26px rgba(20, 20, 24, 0.42),
+    inset 0 1px 0 var(--glass-sheen);
+  -webkit-backdrop-filter: blur(20px) saturate(165%);
+  backdrop-filter: blur(20px) saturate(165%);
+}
+
+.glass-control {
+  background:
+    linear-gradient(
+      140deg,
+      color-mix(in srgb, var(--color-brand) 14%, transparent),
+      transparent 60%
+    ),
+    color-mix(in srgb, var(--color-white) 45%, transparent);
+  border: 1px solid var(--glass-edge);
+  box-shadow: inset 0 1px 0 var(--glass-sheen);
+  -webkit-backdrop-filter: blur(14px) saturate(150%);
+  backdrop-filter: blur(14px) saturate(150%);
+}
+
+.glass-selected {
+  background:
+    linear-gradient(
+      140deg,
+      color-mix(in srgb, var(--color-brand) 18%, transparent),
+      transparent 70%
+    ),
+    color-mix(in srgb, var(--color-white) 72%, transparent);
+  box-shadow:
+    inset 0 1px 0 var(--glass-sheen),
+    0 10px 24px -16px rgba(20, 20, 24, 0.55);
+}
+
+/* ============================================================
+   Opening animation: the header arrives as one whole burger,
+   splits in half and the two halves fly apart to open the nav.
+   ============================================================ */
+
+.bh-intro-burger {
+  animation: bh-burger-pop 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  transform-origin: center;
+}
+
+@keyframes bh-burger-pop {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) scale(0.72);
+  }
+  60% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1.04);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+  }
+}
+
+.bh-intro-half-left {
+  animation: bh-half-left 0.95s cubic-bezier(0.55, 0.05, 0.85, 0.2) forwards;
+}
+
+.bh-intro-half-right {
+  animation: bh-half-right 0.95s cubic-bezier(0.55, 0.05, 0.85, 0.2) forwards;
+}
+
+@keyframes bh-half-left {
+  0% {
+    transform: translateX(0) rotate(0deg);
+  }
+  100% {
+    transform: translateX(-58vw) rotate(-14deg) scale(0.86);
+  }
+}
+
+@keyframes bh-half-right {
+  0% {
+    transform: translateX(0) rotate(0deg);
+  }
+  100% {
+    transform: translateX(58vw) rotate(14deg) scale(0.86);
+  }
+}
+
+.bh-intro-out {
+  animation: bh-intro-fade 0.95s ease 0.35s forwards;
+}
+
+@keyframes bh-intro-fade {
+  0% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.bh-header-open {
+  animation: bh-header-open 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.55s both;
+}
+
+@keyframes bh-header-open {
+  0% {
+    opacity: 0;
+    transform: scaleX(0.35) translateY(-14px);
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Receipt printing from the cashier POS */
+@media print {
+  body * {
+    visibility: hidden !important;
+  }
+
+  .receipt-print,
+  .receipt-print * {
+    visibility: visible !important;
+  }
+
+  .receipt-print {
+    position: fixed;
+    inset: 0;
+    width: 320px;
+    margin: 0 auto;
+    color: #000;
+    background: #fff;
+  }
+}
