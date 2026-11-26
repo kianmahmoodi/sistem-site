@@ -1,10 +1,3 @@
-export const money = (value: number) =>
-  new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(
-    Number.isFinite(value) ? value : 0
-  );
-
-export const round2 = (value: number) => Math.round((value + Number.EPSILON) * 100) / 100;
-
 const LOCALES: Record<string, string> = {
   en: 'en-US',
   fa: 'fa-IR',
@@ -13,9 +6,43 @@ const LOCALES: Record<string, string> = {
   it: 'it-IT',
 };
 
-/** Locale of the language currently selected in the site settings. */
-const currentLocale = () =>
-  (typeof document !== 'undefined' && LOCALES[document.documentElement.lang]) || 'en-US';
+/**
+ * Prices are stored in US dollars. Each site language shows them in the currency of
+ * its country; edit `rate` to your real exchange rate when it moves.
+ */
+const MONEY: Record<string, { currency?: string; suffix?: string; rate: number }> = {
+  en: { currency: 'USD', rate: 1 },
+  fa: { suffix: 'تومان', rate: 1000000 },
+  de: { currency: 'EUR', rate: 0.92 },
+  fr: { currency: 'EUR', rate: 0.92 },
+  it: { currency: 'EUR', rate: 0.92 },
+};
+
+let activeLang = typeof document === 'undefined' ? 'en' : document.documentElement.lang || 'en';
+
+/** Called by the site preferences provider so prices and dates follow the chosen language. */
+export const setFormatLang = (lang: string) => {
+  activeLang = lang;
+};
+
+const currentLocale = () => LOCALES[activeLang] || LOCALES.en;
+
+export const money = (value: number) => {
+  const base = Number.isFinite(value) ? value : 0;
+  const format = MONEY[activeLang] || MONEY.en;
+  const amount = base * format.rate;
+  if (format.suffix) {
+    return `${new Intl.NumberFormat(currentLocale(), { maximumFractionDigits: 0 }).format(
+      Math.round(amount)
+    )} ${format.suffix}`;
+  }
+  return new Intl.NumberFormat(currentLocale(), {
+    style: 'currency',
+    currency: format.currency,
+  }).format(amount);
+};
+
+export const round2 = (value: number) => Math.round((value + Number.EPSILON) * 100) / 100;
 
 export const formatDate = (value: string) => {
   const date = new Date(value);

@@ -53,6 +53,18 @@ Environment variables used by the API: `DATABASE_URL`, `PORT`, `SESSION_SECRET`.
 The web app only needs `API_PROXY_TARGET` (defaults to `http://api:8000`) when the API
 is not reachable at that address.
 
+## Deploy with Docker
+
+`deploy/` holds a production setup — Postgres, the API and nginx serving the built site on
+one origin, so `/api` and the session cookies keep working:
+
+```bash
+cd deploy && cp .env.example .env   # set the database password, SESSION_SECRET and admin login
+docker compose up -d --build
+```
+
+See `deploy/README.md` for the domain/HTTPS, database backup and update steps.
+
 ## Staff sign-in and panels
 
 There is one sign-in page for everybody — customers and staff — at `/login`. After a
@@ -84,7 +96,9 @@ The palette button in the header switches day/night, text size, text colour tone
 site language (English, فارسی, Deutsch, Français, Italiano). The choice is stored in the
 browser; Persian switches the whole layout to RTL and to the bundled Vazirmatn font, and
 menu, hero and deal copy are translated alongside the interface (`web/src/i18n.ts` and
-`web/src/i18n.content.ts`). On every fresh page load the header arrives as one whole
+`web/src/i18n.content.ts`). Prices are stored in US dollars and shown in the currency of
+the selected language — USD, تومان, EUR — with the exchange rates in
+`web/src/lib/format.ts`. On every fresh page load the header arrives as one whole
 burger that splits in half and flies apart to open the navigation.
 
 ## Seed data

@@ -111,7 +111,7 @@ export function MenuSection() {
         </Reveal>
 
         <div className="mt-9 flex flex-col gap-4">
-          <div className="glass-control flex flex-col gap-3 rounded-3xl p-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="glass-control relative z-30 flex flex-col gap-3 rounded-3xl p-3 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex items-center gap-2 overflow-x-auto no-scrollbar" role="tablist" aria-label="Menu categories">
               {chips.map((chip) => (
                 <button

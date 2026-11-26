@@ -2,6 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import type { ReactNode } from 'react';
 import { dirFor, isLang, translate } from '../i18n';
 import type { Lang } from '../i18n';
+import { setFormatLang } from '../lib/format';
 
 export type Theme = 'light' | 'dark';
 export type Tone = 'classic' | 'warm' | 'cool' | 'graphite';
@@ -62,6 +63,9 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
       ? stored.step
       : DEFAULT_STEP
   );
+
+  // Prices and dates follow the selected language, so sync it before children render.
+  setFormatLang(lang);
 
   useEffect(() => {
     const root = document.documentElement;
